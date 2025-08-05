@@ -10,6 +10,15 @@ namespace CSettings {
 		bool Show_Enemy = true;
 		bool Show_Squad = true;
 
+		//visuals
+		bool fov_changer = false;
+		float fov_value = 100.0f;
+		float base_fov_value = 90.0f;
+
+		//movement
+		bool fast_run = false;
+		bool super_run = false;
+		bool jump = false;
 
 		bool window_animation = true;
 		bool navigationwindow_animation = false;

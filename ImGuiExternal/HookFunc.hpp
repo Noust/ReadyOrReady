@@ -8,6 +8,7 @@ enum offset {
 	localplayer = 0x38,
 	player_controller = 0x30,
 	acknowledged_pawn = 0x340,
+	camera_component = 0x1B18,
 	root_component = 0x1A0,
 	character_health = 0x908,
 	camera_manager = 0x350,
@@ -16,11 +17,11 @@ enum offset {
 	allai_actors = 0x5F8
 };
 //"ReadyOrNotSteam-Win64-Shipping.exe" + 2996840
+//"ReadyOrNotSteam-Win64-Shipping.exe"+2EE2CEF
 
 bool Hook(BYTE* pTarget, BYTE* pHook, UINT Length)
 {
 	if (!pTarget || !pHook || Length < 14)
-
 		return false;
 
 	DWORD dwOld = 0;
@@ -74,4 +75,11 @@ DWORD64 FindPattern(char* module, char* pattern, char* mask)
 	}
 
 	return NULL;
+}
+
+void Patch(BYTE* addr, BYTE* bytes, unsigned int size) {
+	DWORD oProc;
+	VirtualProtect(addr, size, PAGE_EXECUTE_READWRITE, &oProc);
+	memcpy(addr, bytes, size);
+	VirtualProtect(addr, size, oProc, &oProc);;
 }

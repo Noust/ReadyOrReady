@@ -32,9 +32,12 @@ double heightscreen;
 #include "Overlay.hpp"
 #include "WorldToScreen.hpp"
 
-#define P(Addr,bytes,size) hooks->Patch((BYTE*)Addr,(BYTE*)bytes,size)
-#define H(Addr,hook,size) hooks->Hook((BYTE*)Addr,(BYTE*)hook,size)
+#define P(Addr,bytes,size) Patch((BYTE*)Addr,(BYTE*)bytes,size)
+#define H(Addr,hook,size) Hook((BYTE*)Addr,(BYTE*)hook,size)
 #define GetAddr(Addr) (DWORD64)GetModuleHandleA("ReadyOrNotSteam-Win64-Shipping.exe") + Addr
 
 #include "HookFunc.hpp"
+#include "hooks.h"
 #include "reader.hpp"
+#include "cheats.h"
+#include "render.hpp"

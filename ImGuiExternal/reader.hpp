@@ -177,11 +177,6 @@ public:
             return false;
         }
     }
-
-    // Versión para escribir bytes (útil para patches)
-    static bool WriteBytes(uintptr_t address, const std::vector<uint8_t>& bytes) {
-        return WriteMemoryArray(address, bytes.data(), bytes.size());
-    }
 };
 
 // Funciones helper para uso más simple
@@ -193,10 +188,6 @@ inline bool write(uintptr_t address, const T& value) {
 template<typename T>
 inline bool WriteMemArraySafe(uintptr_t address, const T* values, size_t count) {
     return MemoryWriter<T>::WriteMemoryArray(address, values, count);
-}
-
-inline bool WriteByteSafe(uintptr_t address, const std::vector<uint8_t>& bytes) {
-    return MemoryWriter<uint8_t>::WriteBytes(address, bytes);
 }
 
 void setBooleanBit(DWORD64 addr, int offset, int bitPosition, bool value) {
@@ -219,6 +210,7 @@ struct world {
 	DWORD64 localPlayer;
 	DWORD64 playerController;
 	DWORD64 acknowledgedPawn;
+	DWORD64 cameraComponent;
 	DWORD64 rootComponent;
 	DWORD64 characterHealth;
 	DWORD64 cameraManager;
@@ -232,6 +224,7 @@ bool ReadGameInstance();
 bool ReadLocalPlayer();
 bool ReadPlayerController();
 bool ReadAcknowledgedPawn();
+bool ReadCameraComponent();
 bool ReadRootComponent();
 bool ReadCharacterHealth();
 bool ReadCameraManager();
@@ -245,6 +238,7 @@ bool ReadValues() {
 	if (!ReadLocalPlayer()) return false;
 	if (!ReadPlayerController()) return false;
 	if (!ReadAcknowledgedPawn()) return false;
+	if (!ReadCameraComponent()) return false;
 	if (!ReadRootComponent()) return false;
 	if (!ReadCharacterHealth()) return false;
 	if (!ReadCameraManager()) return false;
@@ -274,6 +268,10 @@ bool ReadPlayerController() {
 bool ReadAcknowledgedPawn() {
 	if (adresses.playerController == NULL) return false;
 	return read<DWORD64>(adresses.playerController + offset::acknowledged_pawn, adresses.acknowledgedPawn);
+}
+bool ReadCameraComponent() {
+    if (adresses.acknowledgedPawn == NULL) return false;
+    return read<DWORD64>(adresses.acknowledgedPawn + offset::camera_component, adresses.cameraComponent);
 }
 bool ReadRootComponent() {
 	if (adresses.acknowledgedPawn == NULL) return false;
