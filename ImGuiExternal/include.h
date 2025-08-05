@@ -6,7 +6,6 @@
 #include <TlHelp32.h>
 #include <vector>
 #include <dwmapi.h>
-#include <math.h>
 #include <fstream>
 #include <filesystem>
 #include <Psapi.h>
@@ -38,6 +37,7 @@ double heightscreen;
 
 #include "HookFunc.hpp"
 #include "hooks.h"
+#define aactor Actor[i]
 #include "reader.hpp"
 #include "cheats.h"
 #include "render.hpp"

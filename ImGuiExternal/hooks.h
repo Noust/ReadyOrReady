@@ -25,7 +25,7 @@ class Pos_data
 {
 public:
 	char pad_0000[296]; //0x0000
-	Vector3 Pos; //0x0128
+	fvector Pos; //0x0128
 }; //Size: 0x0190
 
 class Health_Data

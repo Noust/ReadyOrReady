@@ -25,33 +25,36 @@ void renderEsp() {
 			float LHealth;
 			if (read<float>(adresses.characterHealth + 0xD8, LHealth)) {
 				if (LHealth > 1) {
-					int numaiactors;
-					if (read<int>(adresses.gameState + (offset::allai_actors + sizeof(uintptr_t)), numaiactors)) {
-						for (int i = 0; i < numaiactors; i++) {
-							DWORD64 currentActor;
-							if (!read<DWORD64>(adresses.allAiActors + (sizeof(uintptr_t) * i), currentActor)) continue;
+					for (int i = 0; i < 254; i++) {
+						if (aactor == nullptr) continue;
+						
+						// OPCIÓN 1: Obtener todos los datos con caché inteligente (recomendado)
+						ValidatedActorData actorData = SafeGetActorCompleteData(aactor);
+						
+						// OPCIÓN 2: Si solo necesitas posición actualizada frecuentemente:
+						// fvector freshPosition;
+						// if (FastGetActorPosition(aactor, freshPosition)) {
+						//     // Usar freshPosition para movimiento más fluido
+						// }
+						
+						if (!actorData.isValid) continue;
+						
+						if (actorData.health < 1) continue;
 
-							DWORD64 actorHealth;
-							if (!read<DWORD64>(currentActor + offset::character_health, actorHealth)) continue;
+						fvector actorLocation = actorData.position;
+						actorLocation.z -= 80;
 
-							float halthvalue;
-							if (!read<float>(actorHealth + 0xD8, halthvalue)) continue;
-							if (halthvalue < 1) continue;
+						fvector2d screenlocation = w2s(actorLocation);
+						if (screenlocation.x < 0 || screenlocation.x > widthscreen || 
+							screenlocation.y < 0 || screenlocation.y > heightscreen) continue;
 
-							DWORD64 rootComponent;
-							if (!read<DWORD64>(currentActor + offset::root_component, rootComponent)) continue;
+						sprintf_s(HealthInfo, "HP: %.0f/%.0f %s", 
+							actorData.health, 
+							actorData.maxHealth,
+							actorData.arrestComplete ? "[ARRESTED]" : "");
 
-							fvector actorLocation = *(fvector*)(rootComponent + 0x128);
-							actorLocation.z -= 80;
-
-							fvector2d screenlocation = w2s(actorLocation);
-							if (screenlocation.x < 0 || screenlocation.x > widthscreen || screenlocation.y < 0 || screenlocation.y > heightscreen) continue;
-
-							sprintf_s(HealthInfo, "Health: %.0f", halthvalue);
-
-							DrawT({ screenlocation.x, screenlocation.y - 20 }, HealthInfo, 1, { 255, 255, 255, 255 });
-							DrawLine({ widthscreen / 2, heightscreen }, { screenlocation.x, screenlocation.y }, { 255, 0, 0, 255 }, 0, true);
-						}
+						DrawString({ screenlocation.x, screenlocation.y - 20 }, { 255, 255, 255, 255 }, 1, HealthInfo);
+						DrawLine({ widthscreen / 2, heightscreen }, { screenlocation.x, screenlocation.y }, { 255, 0, 0, 255 }, 0, true);
 					}
 				}
 			}

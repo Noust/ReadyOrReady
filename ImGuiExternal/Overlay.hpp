@@ -146,6 +146,13 @@ void drawStrokeText(int x, int y, RGBA* color, const char* str) {
     ImGui::GetForegroundDrawList()->AddText(ImVec2(x, y), ImGui::ColorConvertFloat4ToU32(ImVec4(color->R / 255.0, color->G / 255.0, color->B / 255.0, color->A / 255.0)), utf_8_2.c_str());
 }
 
+void drawNewText(int x, int y, RGBA* color, const char* str) {
+    ImFont a;
+    std::string utf_8_1 = std::string(str);
+    std::string utf_8_2 = stringToUTF8(utf_8_1);
+    ImGui::GetForegroundDrawList()->AddText(ImVec2(x, y), ImGui::ColorConvertFloat4ToU32(ImVec4(color->R / 255.0, color->G / 255.0, color->B / 255.0, color->A / 255.0)), utf_8_2.c_str());
+}
+
 void DrawLine(fvector2d pos1, fvector2d pos2, ImColor color, float Thicknes, bool checkpoints) {
     if (checkpoints) {
         if (pos1.x >= 0 && pos1.y >= 0 && pos1.x <= widthscreen && pos1.y <= heightscreen && pos2.x >= 0 && pos2.y >= 0 && pos2.x <= widthscreen && pos2.y <= heightscreen) {
@@ -157,13 +164,6 @@ void DrawLine(fvector2d pos1, fvector2d pos2, ImColor color, float Thicknes, boo
         ImGui::GetBackgroundDrawList()->AddLine(ImVec2(pos1.x, pos1.y), ImVec2(pos2.x, pos2.y), ImColor(0, 0, 0), Thicknes + 2);
         ImGui::GetBackgroundDrawList()->AddLine(ImVec2(pos1.x, pos1.y), ImVec2(pos2.x, pos2.y), color, Thicknes);
     }
-}
-
-void drawNewText(int x, int y, RGBA* color, const char* str) {
-    ImFont a;
-    std::string utf_8_1 = std::string(str);
-    std::string utf_8_2 = stringToUTF8(utf_8_1);
-    ImGui::GetForegroundDrawList()->AddText(ImVec2(x, y), ImGui::ColorConvertFloat4ToU32(ImVec4(color->R / 255.0, color->G / 255.0, color->B / 255.0, color->A / 255.0)), utf_8_2.c_str());
 }
 
 void DrawCircle(fvector2d pos, int radious, int thickness, ImColor color) {
@@ -199,9 +199,110 @@ void drawbox(fvector2d pos, float height, float width, ImColor color, float thic
     DrawLine({ pos.x - width,pos.y - height }, { pos.x - width,pos.y }, color, thickness, false);
 }
 
-void DrawT(fvector2d pos, const char* text, float divide, ImColor color) {
-    ImGui::GetBackgroundDrawList()->AddText(ImVec2(pos.x - ImGui::CalcTextSize(text).x / 2, pos.y - (ImGui::CalcTextSize(text).y / divide)), color, text);
+void DrawString(fvector2d pos, ImColor color, float scale, const char* text) {
+    // Get font size scaled by distance
+    float fontSize = ImGui::GetFontSize() * scale;
+
+    // Calculate text dimensions for centering
+    ImVec2 textSize = ImGui::CalcTextSize(text);
+    ImVec2 textPos = ImVec2(pos.x - (textSize.x * scale) / 2, pos.y);
+
+    // Draw the text with scaling
+    ImGui::GetBackgroundDrawList()->AddText(
+        ImGui::GetFont(),
+        fontSize,
+        textPos,
+        color,
+        text
+    );
 }
+
+void drawhealthbar(Vector2 pos, float height, float width, ImColor color, float thickness) {
+    DrawLine({ pos.x - width,pos.y - height }, { pos.x - width,pos.y }, color, thickness, false);
+}
+
+void drawarmorbar(Vector2 pos, float height, float width, ImColor color, float thickness) {
+    DrawLine({ pos.x + width,pos.y - height }, { pos.x + width,pos.y }, color, thickness, false);
+}
+
+//ImColor HealthBarColor(DWORD64 ent) {
+//    if (E->GetHealth(ent) <= E->GetMaxHealth(ent) && E->GetHealth(ent) > E->GetMaxHealth(ent) * 0.75)
+//        return ImColor(0, 255, 0);
+//    else if (E->GetHealth(ent) <= E->GetMaxHealth(ent) * 0.75 && E->GetHealth(ent) > E->GetMaxHealth(ent) * 0.5)
+//        return ImColor(85, 170, 0);
+//    else if (E->GetHealth(ent) <= E->GetMaxHealth(ent) * 0.5 && E->GetHealth(ent) > E->GetMaxHealth(ent) * 0.25)
+//        return ImColor(170, 85, 0);
+//    else if (E->GetHealth(ent) <= E->GetMaxHealth(ent) * 0.25f && E->GetHealth(ent) > 0)
+//        return ImColor(255, 0, 0);
+//    return ImColor(0, 0, 0, 0);
+//}
+
+//void Draw3DBox(Entitys* Ents, ImColor color, float Thickness, float width) {
+//    Vector3 pos1;
+//    Vector3 pos2;
+//    Vector3 pos3;
+//    Vector3 pos4;
+//    Vector3 pos5;
+//    Vector3 pos6;
+//    Vector3 pos7;
+//    Vector3 pos8;
+//    if (E->GetPos(Ents, pos1) && E->GetPos(Ents, pos2) && E->GetPos(Ents, pos3) && E->GetPos(Ents, pos4) && E->GetPos(Ents, pos5) && E->GetPos(Ents, pos6) && E->GetPos(Ents, pos7) && E->GetPos(Ents, pos8)) {
+//        //Bottom Points
+//        pos1.x += width;
+//        pos1.y += width;
+//        pos1.z -= 90;
+//        pos2.x += width;
+//        pos2.y -= width;
+//        pos2.z -= 90;
+//        pos3.x -= width;
+//        pos3.y -= width;
+//        pos3.z -= 90;
+//        pos4.x -= width;
+//        pos4.y += width;
+//        pos4.z -= 90;
+//
+//        //Top Points
+//        pos5.x += width;
+//        pos5.y += width;
+//        pos5.z += 80;
+//        pos6.x += width;
+//        pos6.y -= width;
+//        pos6.z += 80;
+//        pos7.x -= width;
+//        pos7.y -= width;
+//        pos7.z += 80;
+//        pos8.x -= width;
+//        pos8.y += width;
+//        pos8.z += 80;
+//
+//        //to screen
+//        Vector2 posscreen1 = PosToScreen(pos1);
+//        Vector2 posscreen2 = PosToScreen(pos2);
+//        Vector2 posscreen3 = PosToScreen(pos3);
+//        Vector2 posscreen4 = PosToScreen(pos4);
+//
+//        Vector2 posscreen5 = PosToScreen(pos5);
+//        Vector2 posscreen6 = PosToScreen(pos6);
+//        Vector2 posscreen7 = PosToScreen(pos7);
+//        Vector2 posscreen8 = PosToScreen(pos8);
+//
+//        //Draw Top
+//        DrawLine(posscreen1, posscreen2, color, Thickness, true);
+//        DrawLine(posscreen2, posscreen3, color, Thickness, true);
+//        DrawLine(posscreen3, posscreen4, color, Thickness, true);
+//        DrawLine(posscreen4, posscreen1, color, Thickness, true);
+//
+//        DrawLine(posscreen5, posscreen6, color, Thickness, true);
+//        DrawLine(posscreen6, posscreen7, color, Thickness, true);
+//        DrawLine(posscreen7, posscreen8, color, Thickness, true);
+//        DrawLine(posscreen8, posscreen5, color, Thickness, true);
+//
+//        DrawLine(posscreen5, posscreen1, color, Thickness, true);
+//        DrawLine(posscreen6, posscreen2, color, Thickness, true);
+//        DrawLine(posscreen7, posscreen3, color, Thickness, true);
+//        DrawLine(posscreen8, posscreen4, color, Thickness, true);
+//    }
+//}
 
 void DrawBackgroundAnimation() {
     static std::vector<ImVec2> particles;
@@ -285,6 +386,7 @@ void DrawBackgroundAnimation() {
         draw_list->AddCircleFilled(particle, 2.0f, ImColor(255, 255, 255, static_cast<int>(opacity * 255)));
     }
 }
+
 template <typename T>
 void centertext(const char* text, T value1, T value2) {
     char texto[100];
