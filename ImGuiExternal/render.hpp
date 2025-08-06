@@ -37,7 +37,7 @@ void renderEsp() {
 						
 						if (!shouldloop(actorData)) continue;
 
-						double distance = POV.Location.distance(actorData.position) / 100 - 1;
+						double distance = POV.Location.distance(actorData.position) / 100;
 
 						fvector actorFeetLocation = actorData.position;
 						actorFeetLocation.z -= 85; 
@@ -99,7 +99,7 @@ void renderEsp() {
 								Draw3DBox(actorData, USettings.Squad_Box3D_Esp_Color, USettings.Box3D_Esp_Thickness, USettings.Box3D_Width);
 						}
 
-						if (USettings.Distance_Esp || USettings.Name_ESP || USettings.Type_ESP || USettings.GunName_Esp || USettings.Show_Health) {
+						if (USettings.Distance_Esp || USettings.Name_ESP || USettings.Type_ESP || USettings.GunName_Esp || USettings.Show_Health || USettings.Status_Esp) {
 							fvector toppos = actorHeadLocation;
 							fvector bottompos = actorFeetLocation;
 
@@ -113,20 +113,57 @@ void renderEsp() {
 								topActor.y >= 0 && topActor.y <= heightscreen;
 
 							if (topVisible) {
+								fvector2d squadtop = topActor;
+
+								if (USettings.Status_Esp) {
+									topActor.y -= 15;
+									std::string StatusDisplay;
+
+									if (actorData.surrenderComplete && !actorData.ActorIncapacitated && !actorData.arrestComplete && !actorData.ActorKilled)
+										StatusDisplay += "Surrendered";
+									if (actorData.arrestComplete && !actorData.ActorKilled)
+										StatusDisplay += "Arrested";
+									if (actorData.ActorIncapacitated && !actorData.arrestComplete && !actorData.ActorKilled)
+										StatusDisplay += "Incapacitated";
+									if (actorData.ActorTakenHostage && !actorData.ActorKilled)
+										StatusDisplay += "Taken Hostage";
+									if (actorData.ActorKilled)
+										StatusDisplay += "Killed";
+									if (!actorData.arrestComplete && !actorData.surrenderComplete && !actorData.ActorIncapacitated && !actorData.ActorTakenHostage && !actorData.ActorKilled)
+										StatusDisplay += "None";
+
+									if (actorData.isCivilian)
+										DrawString(topActor, USettings.Civilian_Status_Esp_Color, USettings.Text_Size, StatusDisplay.c_str());
+									if (actorData.isEnemy)
+										DrawString(topActor, USettings.Enemy_Status_Esp_Color, USettings.Text_Size, StatusDisplay.c_str());
+								}
+
 								if (USettings.Type_ESP) {
 									topActor.y -= 15;
+									squadtop.y -= 15;
 									if (actorData.isCivilian)
 										DrawString(topActor, USettings.Civilian_Type_ESP_Color, USettings.Text_Size, "Civilian");
 									if (actorData.isEnemy)
 										DrawString(topActor, USettings.Enemy_Type_ESP_Color, USettings.Text_Size, "Enemy");
 									if (actorData.isSquad)
-										DrawString(topActor, USettings.Squad_Type_ESP_Color, USettings.Text_Size, "Squad");
+										DrawString(squadtop, USettings.Squad_Type_ESP_Color, USettings.Text_Size, "Squad");
 								}
 
 								if (USettings.Name_ESP) {
-									topActor.y -= 15;
-									if (actorData.playerName[0] != L'\0')
-										DrawString(topActor, USettings.Squad_Name_ESP_Color, USettings.Text_Size, WideToString(actorData.playerName).c_str());
+									squadtop.y -= 15;
+									if (actorData.playerName[0] != L'\0') {
+										std::string playerDisplay = WideToString(actorData.playerName);
+										
+										std::string filteredPlayerDisplay;
+										for (char c : playerDisplay) {
+											if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || 
+												(c >= '0' && c <= '9') || c == ' ' || c == '-') {
+												filteredPlayerDisplay += c;
+											}
+										}
+										
+										DrawString(squadtop, USettings.Squad_Name_ESP_Color, USettings.Text_Size, filteredPlayerDisplay.c_str());
+									}
 								}
 							}
 
@@ -144,6 +181,15 @@ void renderEsp() {
 								if (actorData.weaponName[0] != L'\0') {
 									bottomActor.y += 15;
 									std::string weaponDisplay = WideToString(actorData.weaponName);
+									
+									std::string filteredWeaponDisplay;
+									for (char c : weaponDisplay) {
+										if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+											(c >= '0' && c <= '9') || c == ' ' || c == '-') {
+											filteredWeaponDisplay += c;
+										}
+									}
+									weaponDisplay = filteredWeaponDisplay;
 									
 									if (USettings.Show_GunAmmo) {
 										weaponDisplay += " [" + std::to_string(actorData.weaponAmmo) + "]";
@@ -221,6 +267,10 @@ void renderEsp() {
 							}
 						}
 					}
+					if (USettings.Show_CurrentHealth) {
+						sprintf_s(HealthStr, "Current HP: %.0f", LHealth);
+						DrawString({ 60, 25 }, ImColor(255, 255, 255), 1, HealthStr);
+					}
 				}
 			}
 		}
@@ -283,7 +333,7 @@ void renderMenu() {
 	float buttonWidth = (ImGui::GetContentRegionAvail().x - 30) / 4;
 	float spacing = (windowWidth - (buttonWidth * 4)) / 5;
 
-	const char* tabs[] = { "Gun", "Legit", "Visuals", "Config" };
+	const char* tabs[] = { "Player", "Legit", "Visuals", "Config" };
 	int tabValues[] = { 1, 2, 3, 4 };
 
 	for (int i = 0; i < 4; i++) {
@@ -322,7 +372,48 @@ void renderMenu() {
 	else if (CSettings::MenuWindow == 1) {
 		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
 
-		ImGui::Text("Combat Settings");
+		ImGui::Text("Player Settings");
+		ImGui::Checkbox("God Mode", &USettings.GodMode);
+		if (USettings.GodMode && success) {
+			setBooleanBit(adresses.acknowledgedPawn, 0x1760, 0, true);
+			setBooleanBit(adresses.characterHealth, 0xF4, 0, true);
+		}
+		else if (!USettings.GodMode && USettings.GodMode_LastState && success) {
+			setBooleanBit(adresses.acknowledgedPawn, 0x1760, 0, false);
+			setBooleanBit(adresses.characterHealth, 0xF4, 0, false);
+		}
+		USettings.GodMode_LastState = USettings.GodMode;
+		ImGui::Checkbox("Unlimited Melee Range", &USettings.Unlimited_MeleeRange);
+		if (USettings.Unlimited_MeleeRange && success) {
+			write<float>(adresses.acknowledgedPawn + 0x1138, 999999);
+		}
+		else if (!USettings.Unlimited_MeleeRange && USettings.Unlimited_MeleeRange_LastState && success) {
+			write<float>(adresses.acknowledgedPawn + 0x1138, 125);
+		}
+		USettings.Unlimited_MeleeRange_LastState = USettings.Unlimited_MeleeRange;
+		ImGui::Text("Gun Settings");
+		ImGui::Checkbox("No Reload", &USettings.No_Reload);
+		if (USettings.No_Reload && success) {
+			setBooleanBit(adresses.lastweapon, 0x162C, 0, true);
+		}
+		else if (!USettings.No_Reload && USettings.No_Reload_LastState && success) {
+			setBooleanBit(adresses.lastweapon, 0x162C, 0, false);
+		}
+		USettings.No_Reload_LastState = USettings.No_Reload;
+		ImGui::Checkbox("High Fire Rate", &USettings.High_FireRate);
+		if (USettings.High_FireRate && success) {
+			if (fire_rate == 0 && !defaultf) {
+				read<float>(adresses.lastweapon + 0xFD0, fire_rate);
+				defaultf = true;
+			}
+			write<float>(adresses.lastweapon + 0xFD0, 0.001f);
+		}
+		else if (!USettings.High_FireRate && USettings.High_FireRate_LastState && success && fire_rate != 0) {
+			write<float>(adresses.lastweapon + 0xFD0, fire_rate);
+			fire_rate = 0; 
+			defaultf = false;
+		}
+		USettings.High_FireRate_LastState = USettings.High_FireRate;
 
 		ImGui::PopStyleColor();
 	}
@@ -401,7 +492,7 @@ void renderMenu() {
 			if (USettings.SnaplLine_Esp) {
 				ImGui::ColorEdit3("Enemy Line Color", (float*)&USettings.Enemy_SnaplLine_Esp_Color);
 				ImGui::ColorEdit3("Civilian Line Color", (float*)&USettings.Civilian_SnaplLine_Esp_Color);
-				ImGui::ColorEdit3("Team Line Color", (float*)&USettings.Squad_SnaplLine_Esp_Color);
+				ImGui::ColorEdit3("Squad Line Color", (float*)&USettings.Squad_SnaplLine_Esp_Color);
 				ImGui::SliderInt("Line Thickness", &USettings.SnaplLine_Esp_Thickness, 0, 10);
 
 				ImGui::Text("Line Start Position");
@@ -433,7 +524,7 @@ void renderMenu() {
 			if (USettings.Box_ESP) {
 				ImGui::ColorEdit3("Enemy Box Color", (float*)&USettings.Enemy_Box_Esp_Color);
 				ImGui::ColorEdit3("Civilian Box Color", (float*)&USettings.Civilian_Box_Esp_Color);
-				ImGui::ColorEdit3("Team Box Color", (float*)&USettings.Squad_Box_Esp_Color);
+				ImGui::ColorEdit3("Squad Box Color", (float*)&USettings.Squad_Box_Esp_Color);
 				ImGui::SliderInt("Box Thickness", &USettings.Box_Esp_Thickness, 0, 10);
 				ImGui::Separator();
 			}
@@ -442,7 +533,7 @@ void renderMenu() {
 			if (USettings.CornerBox_ESP) {
 				ImGui::ColorEdit3("Enemy Corner Color", (float*)&USettings.Enemy_CornerBox_Esp_Color);
 				ImGui::ColorEdit3("Civilian Corner Color", (float*)&USettings.Civilian_CornerBox_Esp_Color);
-				ImGui::ColorEdit3("Team Corner Color", (float*)&USettings.Squad_CornerBox_Esp_Color);
+				ImGui::ColorEdit3("Squad Corner Color", (float*)&USettings.Squad_CornerBox_Esp_Color);
 				ImGui::SliderInt("Corner Thickness", &USettings.Box_CornerEsp_Thickness, 0, 10);
 				ImGui::Separator();
 			}
@@ -451,7 +542,7 @@ void renderMenu() {
 			if (USettings.Box3D_Esp) {
 				ImGui::ColorEdit3("Enemy 3D Box Color", (float*)&USettings.Enemy_Box3D_Esp_Color);
 				ImGui::ColorEdit3("Civilian 3D Box Color", (float*)&USettings.Civilian_Box3D_Esp_Color);
-				ImGui::ColorEdit3("Team 3D Box Color", (float*)&USettings.Squad_Box3D_Esp_Color);
+				ImGui::ColorEdit3("Squad 3D Box Color", (float*)&USettings.Squad_Box3D_Esp_Color);
 				ImGui::SliderInt("3D Box Thickness", &USettings.Box3D_Esp_Thickness, 0, 10);
 				ImGui::SliderFloat("3D Box Width", &USettings.Box3D_Width, 10, 40);
 				ImGui::Separator();
@@ -461,7 +552,7 @@ void renderMenu() {
 			if (USettings.FilledBox_Esp) {
 				ImGui::ColorEdit4("Enemy Fill Color", (float*)&USettings.Enemy_FilledBox_Esp_Color);
 				ImGui::ColorEdit4("Civilian Fill Color", (float*)&USettings.Civilian_FilledBox_Esp_Color);
-				ImGui::ColorEdit4("Team Fill Color", (float*)&USettings.Squad_FilledBox_Esp_Color);
+				ImGui::ColorEdit4("Squad Fill Color", (float*)&USettings.Squad_FilledBox_Esp_Color);
 				ImGui::Separator();
 			}
 
@@ -474,7 +565,7 @@ void renderMenu() {
 
 			ImGui::Checkbox("Show Types", &USettings.Type_ESP);
 			if (USettings.Type_ESP) {
-				ImGui::ColorEdit3("Player Type Color", (float*)&USettings.Squad_Type_ESP_Color);
+				ImGui::ColorEdit3("Squad Type Color", (float*)&USettings.Squad_Type_ESP_Color);
 				ImGui::ColorEdit3("Enemy Type Color", (float*)&USettings.Enemy_Type_ESP_Color);
 				ImGui::ColorEdit3("Civilian Type Color", (float*)&USettings.Civilian_Type_ESP_Color);
 				ImGui::Separator();
@@ -484,11 +575,16 @@ void renderMenu() {
 			if (USettings.Distance_Esp) {
 				ImGui::ColorEdit3("Enemy Distance Color", (float*)&USettings.Enemy_Distance_Esp_Color);
 				ImGui::ColorEdit3("Civilian Distance Color", (float*)&USettings.Civilian_Distance_Esp_Color);
-				ImGui::ColorEdit3("Team Distance Color", (float*)&USettings.Squad_Distance_Esp_Color);
+				ImGui::ColorEdit3("Squad Distance Color", (float*)&USettings.Squad_Distance_Esp_Color);
 				ImGui::Separator();
 			}
 
-			//status esp falta
+			ImGui::Checkbox("Show Status", &USettings.Status_Esp);
+			if (USettings.Status_Esp) {
+				ImGui::ColorEdit3("Enemy Status Color", (float*)&USettings.Enemy_Status_Esp_Color);
+				ImGui::ColorEdit3("Civilian Status Color", (float*)&USettings.Civilian_Status_Esp_Color);
+				ImGui::Separator();
+			}
 
 			ImGui::Checkbox("Show Weapon", &USettings.GunName_Esp);
 			if (USettings.GunName_Esp) {
@@ -504,16 +600,17 @@ void renderMenu() {
 			//ImGui::Checkbox("Show Bones", &USettings.Bone_Esp);
 			//if (USettings.Bone_Esp) {
 			//	ImGui::ColorEdit3("Enemy Bone Color", (float*)&USettings.Enemy_Bone_Esp_Color);
-			//	ImGui::ColorEdit3("Team Bone Color", (float*)&USettings.Squad_Bone_Esp_Color);
+			//	ImGui::ColorEdit3("Squad Bone Color", (float*)&USettings.Squad_Bone_Esp_Color);
 			//	ImGui::SliderInt("Bone Thickness", &USettings.Bone_Esp_Thickness, 0, 10);
 			//	ImGui::Separator();
 			//}
 
 			ImGui::Checkbox("Show Health", &USettings.Show_Health);
 			if (USettings.Show_Health) {
-				ImGui::Separator();
-				ImGui::Checkbox("Health Bar", &USettings.HealthBar_ESP);
+				ImGui::Text("Health Bar");
+				ImGui::Checkbox("Show Health Bar", &USettings.HealthBar_ESP);
 				ImGui::Text("Especific Health Info");
+				ImGui::Checkbox("Show Current Health", &USettings.Show_CurrentHealth);
 				ImGui::Checkbox("Show Head Health", &USettings.Show_headHealth);
 				ImGui::Checkbox("Show Left Arm Health", &USettings.Show_leftArmHealth);
 				ImGui::Checkbox("Show Right Arm Health", &USettings.Show_rightArmHealth);
@@ -521,7 +618,7 @@ void renderMenu() {
 				ImGui::Checkbox("Show Right Leg Health", &USettings.Show_rightLegHealth);
 				ImGui::ColorEdit3("Enemy Halth Color", (float*)&USettings.Enemy_Health_Esp_Color);
 				ImGui::ColorEdit3("Civilian Halth Color", (float*)&USettings.Civilian_Health_Esp_Color);
-				ImGui::ColorEdit3("Team Halth Color", (float*)&USettings.Squad_Health_Esp_Color);
+				ImGui::ColorEdit3("Squad Halth Color", (float*)&USettings.Squad_Health_Esp_Color);
 			}
 
 			ImGui::Spacing();
@@ -624,6 +721,7 @@ void renderMenu() {
 			USettings.Show_Squad = true;
 			USettings.HealthBar_ESP = false;
 			USettings.Box_ESP = false;
+			USettings.Type_ESP = false;
 			USettings.CornerBox_ESP = false;
 			USettings.Name_ESP = false;
 			USettings.Distance_Esp = false;
@@ -631,6 +729,7 @@ void renderMenu() {
 			USettings.SnaplLine_Esp = false;
 			USettings.FilledBox_Esp = false;
 			USettings.Box3D_Esp = false;
+			USettings.Status_Esp = false;
 			USettings.Night_Mode = false;
 			USettings.FullBright_Mode = false;
 			USettings.window_animation = true;
@@ -645,25 +744,50 @@ void renderMenu() {
 		if (ImGui::Button("Reset to Default")) {
 			USettings.esp = false;
 			USettings.Show_Enemy = true;
+			USettings.Show_Civilian = true;
 			USettings.Show_Squad = true;
+
 			USettings.HealthBar_Esp_Thickness = 2;
-			USettings.HealthBar_ESP = false;
+			USettings.HealthBar_ESP = true;
+			USettings.Show_headHealth = false;
+			USettings.Show_leftArmHealth = false;
+			USettings.Show_leftLegHealth = false;
+			USettings.Show_rightArmHealth = false;
+			USettings.Show_rightLegHealth = false;
+			USettings.Enemy_Health_Esp_Color = { 255,0,0 };
+			USettings.Civilian_Health_Esp_Color = { 0,255,0 };
+			USettings.Squad_Health_Esp_Color = { 0,0,255 };
+			USettings.Show_Health = false;
+
 			USettings.Enemy_Box_Esp_Color = { 255,0,0 };
 			USettings.Civilian_Box_Esp_Color = { 0,255,0 };
 			USettings.Squad_Box_Esp_Color = { 0,0,255 };
 			USettings.Box_Esp_Thickness = 0;
 			USettings.Box_ESP = false;
+
 			USettings.Enemy_CornerBox_Esp_Color = { 255,0,0 };
 			USettings.Civilian_CornerBox_Esp_Color = { 0,255,0 };
 			USettings.Squad_CornerBox_Esp_Color = { 0,0,255 };
 			USettings.Box_CornerEsp_Thickness = 0;
 			USettings.CornerBox_ESP = false;
+
 			USettings.Squad_Name_ESP_Color = { 255,255,255 };
 			USettings.Name_ESP = false;
+
+			USettings.Squad_Type_ESP_Color = { 0,0,255 };
+			USettings.Enemy_Type_ESP_Color = { 255,0,0 };
+			USettings.Civilian_Type_ESP_Color = { 0,255,0 };
+			USettings.Type_ESP = false;
+
 			USettings.Enemy_Distance_Esp_Color = { 255,0,0 };
 			USettings.Civilian_Distance_Esp_Color = { 0,255,0 };
 			USettings.Squad_Distance_Esp_Color = { 0,0,255 };
 			USettings.Distance_Esp = false;
+
+			USettings.Enemy_Status_Esp_Color = { 255,0,0 };
+			USettings.Civilian_Status_Esp_Color = { 0,255,0 };
+			USettings.Status_Esp = false;
+
 			USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2,heightscreen };
 			USettings.SnaplLine_Esp_End_Point = false;
 			USettings.Enemy_SnaplLine_Esp_Color = { 255,0,0 };
@@ -671,23 +795,32 @@ void renderMenu() {
 			USettings.Squad_SnaplLine_Esp_Color = { 0,0,255 };
 			USettings.SnaplLine_Esp_Thickness = 0;
 			USettings.SnaplLine_Esp = false;
+
 			USettings.Enemy_FilledBox_Esp_Color = { 0,0,0,70 };
 			USettings.Civilian_FilledBox_Esp_Color = { 0,0,0,70 };
 			USettings.Squad_FilledBox_Esp_Color = { 0,0,0,70 };
 			USettings.FilledBox_Esp = false;
+
 			USettings.Enemy_GunName_Color = { 255,0,0 };
 			USettings.Squad_GunName_Color = { 0,0,255 };
+			USettings.Show_GunAmmo = false;
+			USettings.Show_GunAmmoType = false;
 			USettings.GunName_Esp = false;
+
 			USettings.Enemy_Box3D_Esp_Color = { 255,0,0 };
 			USettings.Civilian_Box3D_Esp_Color = { 0,255,0 };
 			USettings.Squad_Box3D_Esp_Color = { 0,0,255 };
 			USettings.Box3D_Esp_Thickness = 0;
 			USettings.Box3D_Esp = false;
-			USettings.Box3D_Width = 20;
+			USettings.Box3D_Width = 30;
+
 			USettings.ESP_Distance = 50;
 			USettings.Text_Size = 0.9f;
+
 			USettings.Night_Mode = false;
 			USettings.FullBright_Mode = false;
+
+			//visuals
 			USettings.fov_changer = false;
 			USettings.fov_value = 100.0f;
 			USettings.base_fov_value = 90.0f;
@@ -698,15 +831,19 @@ void renderMenu() {
 			USettings.Crosshair_thickness = 0;
 			USettings.circle = true;
 			USettings.Cross = true;
+
+			//movement
 			USettings.fast_run = false;
 			USettings.super_run = false;
 			USettings.jump = false;
+
 			USettings.window_animation = true;
 			USettings.navigationwindow_animation = false;
 			USettings.optionswindow_animation = false;
 			USettings.show_watermark = true;
 			USettings.OBSBypass = false;
 			USettings.Show_Fps = false;
+
 			USettings.Backround_Animation = true;
 		}
 		ImGui::PopStyleColor();

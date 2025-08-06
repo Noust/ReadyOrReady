@@ -630,6 +630,7 @@ ValidatedActorData SafeGetActorCompleteData(Actors* actor) {
 
 	result.ActorIncapacitated = result.ptrToIncapacitatedBy != nullptr;
 	result.ActorTakenHostage = result.ptrToTakenHostageBy != nullptr;
+	result.ActorKilled = result.ptrToKilledBy != nullptr;
 
 	result.isValid = true;
 
@@ -716,12 +717,14 @@ bool shouldloop(ValidatedActorData actorData) {
 
 	if (!actorData.isValid) return false;
 
-	if (actorData.health < 1) return false;
+	if (actorData.ActorKilled && actorData.reportedComplete) return false;
+
+	if (actorData.isSquad && actorData.ActorKilled && actorData.reportedComplete) return false;
 
 	fvector actorLocation = actorData.position;
 	actorLocation.z -= 80;
 
-	if (POV.Location.distance(actorLocation) / 100 - 1 > USettings.ESP_Distance) return false;
+	if (POV.Location.distance(actorLocation) / 100 > USettings.ESP_Distance) return false;
 
 	fvector2d screenlocation = w2s(actorLocation);
 	if (screenlocation.x < 0 || screenlocation.x > widthscreen ||
@@ -732,6 +735,8 @@ bool shouldloop(ValidatedActorData actorData) {
 	if (actorData.isSquad && !USettings.Show_Squad) return false;
 	if (actorData.isCivilian && !USettings.Show_Civilian) return false;
 	if (actorData.isEnemy && !USettings.Show_Enemy) return false;
+
+	if (actorData.reportedComplete && actorData.arrestComplete) return false;
 
 	return true;
 }

@@ -10,6 +10,8 @@
 #include <filesystem>
 #include <Psapi.h>
 #include <string>
+#include <cctype>
+#include <cmath>
 
 #include <DirectX/d3d9.h>
 #include <DirectX/d3dx9math.h>

@@ -4,26 +4,26 @@
 template<typename T>
 class MemoryReader {
 private:
-    // Verifica si el tipo es válido para leer
+    // Verifica si el tipo es vï¿½lido para leer
     static constexpr bool IsValidType() {
         return std::is_trivially_copyable<T>::value;
     }
 
     static bool IsAddressValid(uintptr_t address, size_t size) {
-        // Verificar rango de direcciones válido
+        // Verificar rango de direcciones vï¿½lido
         if (address == 0 || address == UINTPTR_MAX ||
             address + size < address || // Overflow check
             address + size > UINTPTR_MAX) {
             return false;
         }
 
-        // Verificar que el rango completo está en la misma página de memoria
+        // Verificar que el rango completo estï¿½ en la misma pï¿½gina de memoria
         MEMORY_BASIC_INFORMATION mbi;
         if (!VirtualQuery(reinterpret_cast<LPCVOID>(address), &mbi, sizeof(mbi))) {
             return false;
         }
 
-        // Verificar que todo el rango está dentro de la región
+        // Verificar que todo el rango estï¿½ dentro de la regiï¿½n
         if (address + size > (uintptr_t)mbi.BaseAddress + mbi.RegionSize) {
             return false;
         }
@@ -51,7 +51,7 @@ public:
         __try {
             const T* ptr = reinterpret_cast<const T*>(address);
 
-            // Verificar alineación de memoria
+            // Verificar alineaciï¿½n de memoria
             if (reinterpret_cast<uintptr_t>(ptr) % alignof(T) != 0) {
                 return false;
             }
@@ -61,7 +61,7 @@ public:
             return true;
         }
         __except (EXCEPTION_EXECUTE_HANDLER) {
-            output = {}; // Limpiar output en caso de excepción
+            output = {}; // Limpiar output en caso de excepciï¿½n
             return false;
         }
     }
@@ -90,7 +90,7 @@ private:
         return std::is_trivially_copyable<T>::value;
     }
 
-    // Función auxiliar para cambiar la protección de memoria
+    // Funciï¿½n auxiliar para cambiar la protecciï¿½n de memoria
     static bool ModifyMemoryProtection(uintptr_t address, size_t size, DWORD newProtection, DWORD& oldProtection) {
         return VirtualProtect(reinterpret_cast<LPVOID>(address), size, newProtection, &oldProtection);
     }
@@ -106,7 +106,7 @@ public:
             return false;
         }
 
-        // Verificar alineación
+        // Verificar alineaciï¿½n
         if (address % alignof(T) != 0) {
             return false;
         }
@@ -121,7 +121,7 @@ public:
                 return false;
             }
 
-            // Si la memoria no es escribible, intentar cambiar la protección
+            // Si la memoria no es escribible, intentar cambiar la protecciï¿½n
             if (!(mbi.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE))) {
                 if (!ModifyMemoryProtection(address, sizeof(T), PAGE_EXECUTE_READWRITE, oldProtection)) {
                     return false;
@@ -132,7 +132,7 @@ public:
             // Escribir el valor
             *reinterpret_cast<T*>(address) = value;
 
-            // Restaurar la protección original si fue cambiada
+            // Restaurar la protecciï¿½n original si fue cambiada
             if (protectionChanged) {
                 ModifyMemoryProtection(address, sizeof(T), oldProtection, oldProtection);
             }
@@ -147,7 +147,7 @@ public:
         }
     }
 
-    // Versión para escribir arrays
+    // Versiï¿½n para escribir arrays
     static bool WriteMemoryArray(uintptr_t address, const T* values, size_t count) {
         if (!values || count == 0) {
             return false;
@@ -157,7 +157,7 @@ public:
         bool protectionChanged = false;
 
         __try {
-            // Cambiar protección para todo el array
+            // Cambiar protecciï¿½n para todo el array
             if (!ModifyMemoryProtection(address, sizeof(T) * count, PAGE_EXECUTE_READWRITE, oldProtection)) {
                 return false;
             }
@@ -166,7 +166,7 @@ public:
             // Copiar datos
             memcpy(reinterpret_cast<void*>(address), values, sizeof(T) * count);
 
-            // Restaurar protección
+            // Restaurar protecciï¿½n
             ModifyMemoryProtection(address, sizeof(T) * count, oldProtection, oldProtection);
             return true;
         }
@@ -179,7 +179,7 @@ public:
     }
 };
 
-// Funciones helper para uso más simple
+// Funciones helper para uso mï¿½s simple
 template<typename T>
 inline bool write(uintptr_t address, const T& value) {
     return MemoryWriter<T>::WriteMemory(address, value);
@@ -190,18 +190,69 @@ inline bool WriteMemArraySafe(uintptr_t address, const T* values, size_t count) 
     return MemoryWriter<T>::WriteMemoryArray(address, values, count);
 }
 
-void setBooleanBit(DWORD64 addr, int offset, int bitPosition, bool value) {
-    char* bytePtr = (char*)(addr + offset);
-    char currentByte = *bytePtr;
-
-    if (value) {
-        currentByte |= (1 << bitPosition);
+bool setBooleanBit(DWORD64 addr, int offset, int bitPosition, bool value) {
+    if (addr == 0 || addr == UINTPTR_MAX) {
+        return false;
     }
-    else {
-        currentByte &= ~(1 << bitPosition);
+    
+    if (bitPosition < 0 || bitPosition > 7) {
+        return false;
     }
-
-    *bytePtr = currentByte;
+    
+    uintptr_t targetAddress = addr + offset;
+    
+    if (targetAddress < addr) {
+        return false;
+    }
+    
+    DWORD oldProtection;
+    bool protectionChanged = false;
+    
+    __try {
+        MEMORY_BASIC_INFORMATION mbi;
+        if (!VirtualQuery(reinterpret_cast<LPCVOID>(targetAddress), &mbi, sizeof(mbi))) {
+            return false;
+        }
+        
+        if (targetAddress < (uintptr_t)mbi.BaseAddress || 
+            targetAddress >= (uintptr_t)mbi.BaseAddress + mbi.RegionSize) {
+            return false;
+        }
+        
+        if (mbi.State != MEM_COMMIT) {
+            return false;
+        }
+        
+        if (!(mbi.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE))) {
+            if (!VirtualProtect(reinterpret_cast<LPVOID>(targetAddress), 1, PAGE_EXECUTE_READWRITE, &oldProtection)) {
+                return false;
+            }
+            protectionChanged = true;
+        }
+        
+        char* bytePtr = reinterpret_cast<char*>(targetAddress);
+        char currentByte = *bytePtr;
+        
+        if (value) {
+            currentByte |= (1 << bitPosition);
+        } else {
+            currentByte &= ~(1 << bitPosition);
+        }
+        
+        *bytePtr = currentByte;
+        
+        if (protectionChanged) {
+            VirtualProtect(reinterpret_cast<LPVOID>(targetAddress), 1, oldProtection, &oldProtection);
+        }
+        
+        return true;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        if (protectionChanged) {
+            VirtualProtect(reinterpret_cast<LPVOID>(targetAddress), 1, oldProtection, &oldProtection);
+        }
+        return false;
+    }
 }
 
 struct world {
@@ -210,6 +261,8 @@ struct world {
 	DWORD64 localPlayer;
 	DWORD64 playerController;
 	DWORD64 acknowledgedPawn;
+    DWORD64 inventorycomp;
+    DWORD64 lastweapon;
 	DWORD64 cameraComponent;
 	DWORD64 rootComponent;
 	DWORD64 characterHealth;
@@ -225,6 +278,8 @@ bool ReadAcknowledgedPawn();
 bool ReadCameraComponent();
 bool ReadRootComponent();
 bool ReadCharacterHealth();
+bool ReadInventoryComp();
+bool ReadLastWeapon();
 bool ReadCameraManager();
 bool ReadCameraCache();
 
@@ -237,6 +292,8 @@ bool ReadValues() {
 	if (!ReadCameraComponent()) return false;
 	if (!ReadRootComponent()) return false;
 	if (!ReadCharacterHealth()) return false;
+    if (!ReadInventoryComp()) return false;
+    if (!ReadLastWeapon()) return false;
 	if (!ReadCameraManager()) return false;
 	if (!ReadCameraCache()) return false;
 	return true;
@@ -275,12 +332,42 @@ bool ReadCharacterHealth() {
 	if (adresses.acknowledgedPawn == NULL) return false;
 	return read<DWORD64>(adresses.acknowledgedPawn + offset::character_health, adresses.characterHealth);
 }
+bool ReadInventoryComp() {
+    if (adresses.acknowledgedPawn == NULL) return false;
+    return read<DWORD64>(adresses.acknowledgedPawn + offset::inventory_comp, adresses.inventorycomp);
+}
+bool ReadLastWeapon() {
+    if (adresses.inventorycomp == NULL) return false;
+    return read<DWORD64>(adresses.inventorycomp + offset::last_weapon, adresses.lastweapon);
+}
 bool ReadCameraManager() {
 	if (adresses.playerController == NULL) return false;
 	return read<DWORD64>(adresses.playerController + offset::camera_manager, adresses.cameraManager);
 }
 bool ReadCameraCache() {
-	if (adresses.cameraManager == NULL) return false;
-	POV = *(FMinimalViewInfo*)(adresses.cameraManager + offset::camera_cache);
-    return true;
+    if (adresses.cameraManager == NULL) return false;
+
+    uintptr_t cameraAddress = adresses.cameraManager + offset::camera_cache;
+
+    MEMORY_BASIC_INFORMATION mbi;
+    if (!VirtualQuery(reinterpret_cast<LPCVOID>(cameraAddress), &mbi, sizeof(mbi))) {
+        return false;
+    }
+
+    if (cameraAddress + sizeof(FMinimalViewInfo) > (uintptr_t)mbi.BaseAddress + mbi.RegionSize) {
+        return false;
+    }
+
+    if (!(mbi.State == MEM_COMMIT &&
+        mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+        return false;
+    }
+
+    __try {
+        POV = *(FMinimalViewInfo*)(cameraAddress);
+        return true;
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER) {
+        return false;
+    }
 }

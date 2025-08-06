@@ -13,7 +13,6 @@ struct ValidatedActorData {
 	float health;
 	float maxHealth;
 	fvector position;
-	bool arrestComplete;
 	Actor_Data* ptrToActor;
 	bool isSquad;
 	bool isCivilian;
@@ -22,8 +21,14 @@ struct ValidatedActorData {
 	bool beingCarried;
 	float meleeDamage;
 	float meleeRange;
+
 	bool reportedComplete;
+
 	bool surrenderComplete;
+	bool arrestComplete;
+	bool ActorIncapacitated;
+	bool ActorTakenHostage;
+	bool ActorKilled;
 	
 	float headHealth;
 	float headMaxHealth;
@@ -48,10 +53,7 @@ struct ValidatedActorData {
 	Skeleton_Data* ptrToSkeleton;
 	Skeleton_Data1* ptrToSkeleton1;
 
-	bool ActorIncapacitated;
-	bool ActorTakenHostage;
-
-	ValidatedActorData() : isValid(false), health(0.0f), maxHealth(0.0f), position({ 0,0,0 }), arrestComplete(false), ptrToActor(nullptr), ActorIncapacitated(false), ActorTakenHostage(false), isSquad(false), isCivilian(false), isEnemy(false),
+	ValidatedActorData() : isValid(false), health(0.0f), maxHealth(0.0f), position({ 0,0,0 }), arrestComplete(false), ptrToActor(nullptr), ActorIncapacitated(false), ActorTakenHostage(false), ActorKilled(false), isSquad(false), isCivilian(false), isEnemy(false),
 		beingCarried(false), meleeDamage(0.0f), meleeRange(0.0f), reportedComplete(false), surrenderComplete(false),
 		headHealth(0.0f), headMaxHealth(0.0f), leftArmHealth(0.0f), leftArmMaxHealth(0.0f), leftLegHealth(0.0f), leftLegMaxHealth(0.0f),
 		rightArmHealth(0.0f), rightArmMaxHealth(0.0f), rightLegHealth(0.0f), rightLegMaxHealth(0.0f),

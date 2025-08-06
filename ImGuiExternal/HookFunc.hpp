@@ -11,6 +11,8 @@ enum offset {
 	camera_component = 0x1B18,
 	root_component = 0x1A0,
 	character_health = 0x908,
+	inventory_comp = 0x910,
+	last_weapon = 0x1D8,
 	camera_manager = 0x350,
 	camera_cache = 0x1330
 };

@@ -13,6 +13,7 @@ namespace CSettings {
 
 		int HealthBar_Esp_Thickness = 2;
 		bool HealthBar_ESP = true;
+		bool Show_CurrentHealth = false;
 		bool Show_headHealth = false;
 		bool Show_leftArmHealth = false;
 		bool Show_leftLegHealth = false;
@@ -47,6 +48,10 @@ namespace CSettings {
 		ImColor Civilian_Distance_Esp_Color = { 0,255,0 };
 		ImColor Squad_Distance_Esp_Color = { 0,0,255 };
 		bool Distance_Esp = false;
+
+		ImColor Enemy_Status_Esp_Color = { 255,0,0 };
+		ImColor Civilian_Status_Esp_Color = { 0,255,0 };
+		bool Status_Esp = false;
 
 		fvector2d SnaplLine_Esp_Start_Point = { widthscreen / 2,heightscreen };
 		bool SnaplLine_Esp_End_Point = false;
@@ -91,6 +96,16 @@ namespace CSettings {
 		int Crosshair_thickness = 0;
 		bool circle = true;
 		bool Cross = true;
+
+		//Player
+		bool GodMode = false;
+		bool GodMode_LastState = false;
+		bool Unlimited_MeleeRange = false;
+		bool Unlimited_MeleeRange_LastState = false;
+		bool No_Reload = false;
+		bool No_Reload_LastState = false;
+		bool High_FireRate = false;
+		bool High_FireRate_LastState = false;
 
 		//movement
 		bool fast_run = false;
