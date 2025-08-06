@@ -177,3 +177,8 @@ __declspec(naked) void GetActors() {
 		jmp[jmpback]
 	}
 }
+
+struct Magazine {
+	uint16_t Ammo;
+	uint16_t Ammo_Type;
+};

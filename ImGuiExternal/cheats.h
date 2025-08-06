@@ -4,10 +4,12 @@ bool success = false;
 bool spaceKeyPressed = false;
 bool defaultv = false;
 bool defaultf = false;
+float fire_rate = 0;
+bool defaulta = false;
+uint16_t c_ammo = 0;
 char distStr[32];
 char HealthStr[32];
 float LHealth;
-float fire_rate = 0;
 
 class cheats {
 public:

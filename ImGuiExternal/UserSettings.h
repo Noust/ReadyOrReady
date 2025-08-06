@@ -106,6 +106,7 @@ namespace CSettings {
 		bool No_Reload_LastState = false;
 		bool High_FireRate = false;
 		bool High_FireRate_LastState = false;
+		bool Show_Magazines = false;
 
 		//movement
 		bool fast_run = false;

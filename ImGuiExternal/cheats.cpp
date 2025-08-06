@@ -14,7 +14,7 @@ void cheats::unload() {
 
 
 void loop() {
-	if (USettings.esp || USettings.fov_changer || USettings.fast_run || USettings.super_run || USettings.jump || USettings.GodMode || USettings.Unlimited_MeleeRange || USettings.GodMode_LastState || USettings.High_FireRate_LastState || USettings.No_Reload_LastState || USettings.Unlimited_MeleeRange_LastState || !defaultv) {
+	if (USettings.esp || USettings.fov_changer || USettings.fast_run || USettings.super_run || USettings.jump || USettings.GodMode || USettings.Unlimited_MeleeRange || USettings.GodMode_LastState || USettings.High_FireRate_LastState || USettings.No_Reload_LastState || USettings.Unlimited_MeleeRange_LastState || USettings.Show_Magazines || !defaultv) {
 		if (ReadValues())
 			success = true;
 		else

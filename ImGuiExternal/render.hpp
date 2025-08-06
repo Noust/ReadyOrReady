@@ -318,7 +318,7 @@ void renderMenu() {
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 12.0f);
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.11f, 0.11f, 0.11f, 1.00f));
 
-	ImGui::Begin("CS Menu", nullptr, ImGuiWindowFlags_NoCollapse);
+	ImGui::Begin("RON Menu", nullptr, ImGuiWindowFlags_NoCollapse);
 	ImVec2 windowpos = ImGui::GetWindowPos();
 	ImVec2 windowsize = ImGui::GetWindowSize();
 
@@ -364,7 +364,7 @@ void renderMenu() {
 	if (CSettings::MenuWindow == 0) {
 		ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x / 2) - 100);
 		ImGui::Image((void*)pTexture, ImVec2(200, 170));
-		centertext<float>("CSGO 2 Menu by Nova", 0.0f, 0.0f);
+		centertext<float>("RON Menu by Noust", 0.0f, 0.0f);
 		centertext<float>("Window Size X:%0.f Y:%0.f", windowsize.x, windowsize.y);
 	}
 
@@ -377,10 +377,12 @@ void renderMenu() {
 		if (USettings.GodMode && success) {
 			setBooleanBit(adresses.acknowledgedPawn, 0x1760, 0, true);
 			setBooleanBit(adresses.characterHealth, 0xF4, 0, true);
+			write<float>(adresses.characterHealth + 0xD8, 999999);
 		}
 		else if (!USettings.GodMode && USettings.GodMode_LastState && success) {
 			setBooleanBit(adresses.acknowledgedPawn, 0x1760, 0, false);
 			setBooleanBit(adresses.characterHealth, 0xF4, 0, false);
+			write<float>(adresses.characterHealth + 0xD8, 160);
 		}
 		USettings.GodMode_LastState = USettings.GodMode;
 		ImGui::Checkbox("Unlimited Melee Range", &USettings.Unlimited_MeleeRange);
@@ -392,12 +394,32 @@ void renderMenu() {
 		}
 		USettings.Unlimited_MeleeRange_LastState = USettings.Unlimited_MeleeRange;
 		ImGui::Text("Gun Settings");
-		ImGui::Checkbox("No Reload", &USettings.No_Reload);
+		ImGui::Checkbox("Inifinite Ammo", &USettings.No_Reload);
 		if (USettings.No_Reload && success) {
 			setBooleanBit(adresses.lastweapon, 0x162C, 0, true);
+			if (c_ammo == 0 && !defaulta) {
+				read<uint16_t>(adresses.magazines + 0x0, c_ammo);
+				defaulta = true;
+			}
+			int numMagazines;
+			if (read<int>(adresses.lastweapon + (offset::magazines + sizeof(uintptr_t)), numMagazines)) {
+				for (int i = 0; i < numMagazines; i++) {
+					uintptr_t currentMagAddress = adresses.magazines + i * sizeof(Magazine);
+					write<uint16_t>(currentMagAddress + offsetof(Magazine, Ammo), static_cast<uint16_t>(999));
+				}
+			}
 		}
-		else if (!USettings.No_Reload && USettings.No_Reload_LastState && success) {
+		else if (!USettings.No_Reload && USettings.No_Reload_LastState && success && c_ammo != 0) {
 			setBooleanBit(adresses.lastweapon, 0x162C, 0, false);
+			int numMagazines;
+			if (read<int>(adresses.lastweapon + (offset::magazines + sizeof(uintptr_t)), numMagazines)) {
+				for (int i = 0; i < numMagazines; i++) {
+					uintptr_t currentMagAddress = adresses.magazines + i * sizeof(Magazine);
+					write<uint16_t>(currentMagAddress + offsetof(Magazine, Ammo), static_cast<uint16_t>(c_ammo));
+				}
+				c_ammo = 0;
+				defaulta = false;
+			}
 		}
 		USettings.No_Reload_LastState = USettings.No_Reload;
 		ImGui::Checkbox("High Fire Rate", &USettings.High_FireRate);
@@ -414,6 +436,127 @@ void renderMenu() {
 			defaultf = false;
 		}
 		USettings.High_FireRate_LastState = USettings.High_FireRate;
+		ImGui::Checkbox("Show Magazines", &USettings.Show_Magazines);
+		if (USettings.Show_Magazines && success) {
+			int numMagazines;
+			if (read<int>(adresses.lastweapon + (offset::magazines + sizeof(uintptr_t)), numMagazines)) {
+				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+				ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1.0f);
+				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.15f, 0.15f, 0.15f, 0.9f));
+				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.28f, 0.28f, 0.28f, 0.8f));
+				
+				if (ImGui::BeginChild("##magazines_window", ImVec2(0, 190), true, ImGuiWindowFlags_NoScrollbar)) {
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+					ImGui::Text("Magazine Information");
+					ImGui::PopStyleColor();
+					ImGui::Separator();
+					ImGui::Spacing();
+					
+					ImGui::Columns(3, "magazine_columns", true);
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+					ImGui::Text("Magazine #");
+					ImGui::NextColumn();
+					ImGui::Text("Ammo Count");
+					ImGui::NextColumn();
+					ImGui::Text("Ammo Type");
+					ImGui::PopStyleColor();
+					ImGui::NextColumn();
+					ImGui::Separator();
+					
+					for (int i = 0; i < numMagazines; i++) {
+						Magazine weapon_magazine = *(Magazine*)(adresses.magazines + i * sizeof(Magazine));
+						uintptr_t currentMagAddress = adresses.magazines + i * sizeof(Magazine);
+						
+						ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.33f, 0.67f, 0.86f, 1.0f));
+						ImGui::Text("Mag %d", i + 1);
+						ImGui::PopStyleColor();
+						ImGui::NextColumn();
+						
+						// Editable Ammo Count
+						ImVec4 ammoColor;
+						if (weapon_magazine.Ammo > 25) {
+							ammoColor = ImVec4(0.2f, 1.0f, 0.2f, 1.0f);
+						} else if (weapon_magazine.Ammo > 10) {
+							ammoColor = ImVec4(1.0f, 1.0f, 0.2f, 1.0f);
+						} else {
+							ammoColor = ImVec4(1.0f, 0.2f, 0.2f, 1.0f);
+						}
+						
+						ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.2f, 0.2f, 0.2f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.4f, 0.4f, 0.4f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_Text, ammoColor);
+						
+						char ammoBuffer[8];
+						snprintf(ammoBuffer, sizeof(ammoBuffer), "%d", weapon_magazine.Ammo);
+						ImGui::SetNextItemWidth(50);
+						
+						char inputId[32];
+						snprintf(inputId, sizeof(inputId), "##ammo_%d", i);
+						
+						if (ImGui::InputText(inputId, ammoBuffer, sizeof(ammoBuffer), ImGuiInputTextFlags_CharsDecimal | ImGuiInputTextFlags_EnterReturnsTrue)) {
+							int newAmmo = atoi(ammoBuffer);
+							if (newAmmo >= 0 && newAmmo <= 9999) {
+								if (write<uint16_t>(currentMagAddress + offsetof(Magazine, Ammo), static_cast<uint16_t>(newAmmo))) {
+
+								}
+							}
+						}
+						
+						ImGui::PopStyleColor(4);
+						ImGui::NextColumn();
+						
+						const char* ammoTypeStr;
+						ImVec4 typeColor;
+						switch (weapon_magazine.Ammo_Type) {
+							case 0:
+								ammoTypeStr = "AP";
+								typeColor = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
+								break;
+							case 1:
+								ammoTypeStr = "JHP";
+								typeColor = ImVec4(1.0f, 0.6f, 0.2f, 1.0f);
+								break;
+							default:
+								ammoTypeStr = "Unknown";
+								typeColor = ImVec4(0.50f, 0.50f, 0.50f, 1.0f);
+								break;
+						}
+						
+						char buttonId[32];
+						snprintf(buttonId, sizeof(buttonId), "%s##type_%d", ammoTypeStr, i);
+						
+						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.8f));
+						ImGui::PushStyleColor(ImGuiCol_Text, typeColor);
+						
+						if (ImGui::Button(buttonId, ImVec2(60, 0))) {
+							uint16_t newType = (weapon_magazine.Ammo_Type == 0) ? 1 : 0;
+							if (write<uint16_t>(currentMagAddress + offsetof(Magazine, Ammo_Type), newType)) {
+
+							}
+						}
+						
+						ImGui::PopStyleColor(4);
+						ImGui::NextColumn();
+					}
+					
+					ImGui::Columns(1);
+					ImGui::Spacing();
+					
+					ImGui::Separator();
+					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+					ImGui::Text("Total Magazines: %d", numMagazines);
+					ImGui::PopStyleColor();
+				}
+				ImGui::EndChild();
+				
+				// Cleanup styles
+				ImGui::PopStyleColor(2);
+				ImGui::PopStyleVar(2);
+			}
+		}
 
 		ImGui::PopStyleColor();
 	}

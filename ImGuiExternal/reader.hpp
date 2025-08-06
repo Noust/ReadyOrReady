@@ -263,6 +263,7 @@ struct world {
 	DWORD64 acknowledgedPawn;
     DWORD64 inventorycomp;
     DWORD64 lastweapon;
+    DWORD64 magazines;
 	DWORD64 cameraComponent;
 	DWORD64 rootComponent;
 	DWORD64 characterHealth;
@@ -280,6 +281,7 @@ bool ReadRootComponent();
 bool ReadCharacterHealth();
 bool ReadInventoryComp();
 bool ReadLastWeapon();
+bool ReadMagazines();
 bool ReadCameraManager();
 bool ReadCameraCache();
 
@@ -294,6 +296,7 @@ bool ReadValues() {
 	if (!ReadCharacterHealth()) return false;
     if (!ReadInventoryComp()) return false;
     if (!ReadLastWeapon()) return false;
+    if (!ReadMagazines()) return false;
 	if (!ReadCameraManager()) return false;
 	if (!ReadCameraCache()) return false;
 	return true;
@@ -339,6 +342,10 @@ bool ReadInventoryComp() {
 bool ReadLastWeapon() {
     if (adresses.inventorycomp == NULL) return false;
     return read<DWORD64>(adresses.inventorycomp + offset::last_weapon, adresses.lastweapon);
+}
+bool ReadMagazines() {
+    if (adresses.lastweapon == NULL) return false;
+    return read<DWORD64>(adresses.lastweapon + offset::magazines, adresses.magazines);
 }
 bool ReadCameraManager() {
 	if (adresses.playerController == NULL) return false;
