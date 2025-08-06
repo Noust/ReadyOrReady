@@ -228,6 +228,291 @@ bool SafeGetActorArrestStatus(Actor_Data* actorData, bool& outArrestComplete) {
 	}
 }
 
+bool SafeGetActorStateData(Actor_Data* actorData, bool& outBeingCarried, float& outMeleeDamage, float& outMeleeRange, bool& outReportedComplete, bool& outSurrenderComplete) {
+	if (!actorData) return false;
+
+	__try {
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(actorData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		// Validate each field address
+		if (reinterpret_cast<uintptr_t>(&actorData->Being_Carried) < reinterpret_cast<uintptr_t>(actorData) ||
+			reinterpret_cast<uintptr_t>(&actorData->Being_Carried) >= reinterpret_cast<uintptr_t>(actorData) + sizeof(Actor_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&actorData->MeleeDamage) < reinterpret_cast<uintptr_t>(actorData) ||
+			reinterpret_cast<uintptr_t>(&actorData->MeleeDamage) >= reinterpret_cast<uintptr_t>(actorData) + sizeof(Actor_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&actorData->MeleeRange) < reinterpret_cast<uintptr_t>(actorData) ||
+			reinterpret_cast<uintptr_t>(&actorData->MeleeRange) >= reinterpret_cast<uintptr_t>(actorData) + sizeof(Actor_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&actorData->reported_complete) < reinterpret_cast<uintptr_t>(actorData) ||
+			reinterpret_cast<uintptr_t>(&actorData->reported_complete) >= reinterpret_cast<uintptr_t>(actorData) + sizeof(Actor_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&actorData->surrender_complete) < reinterpret_cast<uintptr_t>(actorData) ||
+			reinterpret_cast<uintptr_t>(&actorData->surrender_complete) >= reinterpret_cast<uintptr_t>(actorData) + sizeof(Actor_Data)) {
+			return false;
+		}
+
+		outBeingCarried = actorData->Being_Carried;
+		outMeleeDamage = actorData->MeleeDamage;
+		outMeleeRange = actorData->MeleeRange;
+		outReportedComplete = actorData->reported_complete;
+		outSurrenderComplete = actorData->surrender_complete;
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		outBeingCarried = false;
+		outMeleeDamage = 0.0f;
+		outMeleeRange = 0.0f;
+		outReportedComplete = false;
+		outSurrenderComplete = false;
+		return false;
+	}
+}
+
+bool SafeGetActorDetailedHealthData(Actor_Data* actorData, float& outHeadHealth, float& outHeadMaxHealth, float& outLeftArmHealth, float& outLeftArmMaxHealth, 
+	float& outLeftLegHealth, float& outLeftLegMaxHealth, float& outRightArmHealth, float& outRightArmMaxHealth, float& outRightLegHealth, float& outRightLegMaxHealth) {
+	if (!actorData) return false;
+
+	__try {
+		Health_Data* healthData = actorData->PtrToHealth;
+		if (!healthData) return false;
+
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(healthData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		// Validate each health field address
+		if (reinterpret_cast<uintptr_t>(&healthData->HeadHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->HeadHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->HeadMaxHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->HeadMaxHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->LeftArmHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->LeftArmHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->LeftArmMaxHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->LeftArmMaxHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->LeftLegHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->LeftLegHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->LeftLegMaxHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->LeftLegMaxHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->RightArmHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->RightArmHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->RightArmMaxHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->RightArmMaxHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->RightLegHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->RightLegHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&healthData->RightLegMaxHealth) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->RightLegMaxHealth) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		outHeadHealth = healthData->HeadHealth;
+		outHeadMaxHealth = healthData->HeadMaxHealth;
+		outLeftArmHealth = healthData->LeftArmHealth;
+		outLeftArmMaxHealth = healthData->LeftArmMaxHealth;
+		outLeftLegHealth = healthData->LeftLegHealth;
+		outLeftLegMaxHealth = healthData->LeftLegMaxHealth;
+		outRightArmHealth = healthData->RightArmHealth;
+		outRightArmMaxHealth = healthData->RightArmMaxHealth;
+		outRightLegHealth = healthData->RightLegHealth;
+		outRightLegMaxHealth = healthData->RightLegMaxHealth;
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		outHeadHealth = 0.0f;
+		outHeadMaxHealth = 0.0f;
+		outLeftArmHealth = 0.0f;
+		outLeftArmMaxHealth = 0.0f;
+		outLeftLegHealth = 0.0f;
+		outLeftLegMaxHealth = 0.0f;
+		outRightArmHealth = 0.0f;
+		outRightArmMaxHealth = 0.0f;
+		outRightLegHealth = 0.0f;
+		outRightLegMaxHealth = 0.0f;
+		return false;
+	}
+}
+
+bool SafeGetActorPlayerName(Actor_Data* actorData, wchar_t outPlayerName[22]) {
+	if (!actorData) return false;
+	
+	memset(outPlayerName, 0, 22 * sizeof(wchar_t));
+
+	__try {
+		Player_Data* playerData = actorData->PtrToPlayerState;
+		if (!playerData) return false;
+
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(playerData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		Name_Data* nameData = playerData->PtrToName;
+		if (!nameData) return false;
+
+		if (!VirtualQuery(nameData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		if (reinterpret_cast<uintptr_t>(&nameData->Name) < reinterpret_cast<uintptr_t>(nameData) ||
+			reinterpret_cast<uintptr_t>(&nameData->Name) >= reinterpret_cast<uintptr_t>(nameData) + sizeof(Name_Data)) {
+			return false;
+		}
+
+		memcpy(outPlayerName, nameData->Name, 22 * sizeof(wchar_t));
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		memset(outPlayerName, 0, 22 * sizeof(wchar_t));
+		return false;
+	}
+}
+
+bool SafeGetActorWeaponData(Actor_Data* actorData, uint16_t& outAmmo, uint16_t& outAmmoType, wchar_t outWeaponName[8]) {
+	if (!actorData) return false;
+	
+	outAmmo = 0;
+	outAmmoType = 0;
+	memset(outWeaponName, 0, 8 * sizeof(wchar_t));
+
+	__try {
+		Weapon_Data* weaponData = actorData->PtrToWeapon;
+		if (!weaponData) return false;
+
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(weaponData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		LastWeapon_Data* lastWeaponData = weaponData->PtrToLastWeapon;
+		if (!lastWeaponData) return false;
+
+		if (!VirtualQuery(lastWeaponData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		// Get ammo data
+		Magazine_Data* magazineData = lastWeaponData->PtrToMagazine;
+		if (magazineData) {
+			if (VirtualQuery(magazineData, &mbi, sizeof(mbi))) {
+				if (mbi.State == MEM_COMMIT &&
+					(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+					
+					if (reinterpret_cast<uintptr_t>(&magazineData->Ammo) >= reinterpret_cast<uintptr_t>(magazineData) &&
+						reinterpret_cast<uintptr_t>(&magazineData->Ammo) < reinterpret_cast<uintptr_t>(magazineData) + sizeof(Magazine_Data)) {
+						outAmmo = magazineData->Ammo;
+					}
+
+					if (reinterpret_cast<uintptr_t>(&magazineData->Ammo_Type) >= reinterpret_cast<uintptr_t>(magazineData) &&
+						reinterpret_cast<uintptr_t>(&magazineData->Ammo_Type) < reinterpret_cast<uintptr_t>(magazineData) + sizeof(Magazine_Data)) {
+						outAmmoType = magazineData->Ammo_Type;
+					}
+				}
+			}
+		}
+
+		// Get weapon name
+		WeaponName_Data* weaponNameData = lastWeaponData->PtrToWeaponName;
+		if (weaponNameData) {
+			if (VirtualQuery(weaponNameData, &mbi, sizeof(mbi))) {
+				if (mbi.State == MEM_COMMIT &&
+					(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+					
+					WeaponName_Data1* weaponNameData1 = weaponNameData->PtrToWeaponName1;
+					if (weaponNameData1) {
+						if (VirtualQuery(weaponNameData1, &mbi, sizeof(mbi))) {
+							if (mbi.State == MEM_COMMIT &&
+								(mbi.Protect & (PAGE_READONLY | PAGE_READWRITE | PAGE_EXECUTE_READ | PAGE_EXECUTE_READWRITE))) {
+								
+								if (reinterpret_cast<uintptr_t>(&weaponNameData1->WeaponName) >= reinterpret_cast<uintptr_t>(weaponNameData1) &&
+									reinterpret_cast<uintptr_t>(&weaponNameData1->WeaponName) < reinterpret_cast<uintptr_t>(weaponNameData1) + sizeof(WeaponName_Data1)) {
+									memcpy(outWeaponName, weaponNameData1->WeaponName, 8 * sizeof(wchar_t));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		outAmmo = 0;
+		outAmmoType = 0;
+		memset(outWeaponName, 0, 8 * sizeof(wchar_t));
+		return false;
+	}
+}
+
 ValidatedActorData SafeGetActorCompleteData(Actors* actor) {
 	ValidatedActorData result;
 
@@ -295,11 +580,56 @@ ValidatedActorData SafeGetActorCompleteData(Actors* actor) {
 		return result;
 	}
 
+	// Get additional actor state data
+	if (!SafeGetActorStateData(actorData, result.beingCarried, result.meleeDamage, result.meleeRange, result.reportedComplete, result.surrenderComplete)) {
+		UpdateActorCache(actor, false, result, currentTime);
+		return result;
+	}
+
+	// Get detailed health data for body parts
+	if (!SafeGetActorDetailedHealthData(actorData, result.headHealth, result.headMaxHealth, result.leftArmHealth, result.leftArmMaxHealth,
+		result.leftLegHealth, result.leftLegMaxHealth, result.rightArmHealth, result.rightArmMaxHealth, result.rightLegHealth, result.rightLegMaxHealth)) {
+		UpdateActorCache(actor, false, result, currentTime);
+		return result;
+	}
+
+	// Get player name (non-critical, continue even if it fails)
+	SafeGetActorPlayerName(actorData, result.playerName);
+
+	// Get weapon data (non-critical, continue even if it fails)
+	SafeGetActorWeaponData(actorData, result.weaponAmmo, result.weaponAmmoType, result.weaponName);
+
 	result.ptrToActor = actorData;
+
+	// Get pointer addresses for external references
+	__try {
+		result.ptrToIncapacitatedBy = actorData->PtrToIncapacitatedBy;
+		result.ptrToKilledBy = actorData->PtrToKilledBy;
+		result.ptrToArrestedBy = actorData->PtrToArrestedBy;
+		result.ptrToTakenHostageBy = actorData->PtrToTakenHostageBy;
+		
+		// Get mesh skeleton pointers
+		if (actorData->PtrToMesh) {
+			result.ptrToSkeleton = actorData->PtrToMesh->PtrToSkeleton;
+			result.ptrToSkeleton1 = actorData->PtrToMesh->PtrToSkeleton1;
+		}
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		// If pointer retrieval fails, set to nullptr but don't fail the entire function
+		result.ptrToIncapacitatedBy = nullptr;
+		result.ptrToKilledBy = nullptr;
+		result.ptrToArrestedBy = nullptr;
+		result.ptrToTakenHostageBy = nullptr;
+		result.ptrToSkeleton = nullptr;
+		result.ptrToSkeleton1 = nullptr;
+	}
 
 	result.isSquad = result.maxHealth == 160 || result.maxHealth == 250;
 	result.isCivilian = result.maxHealth == 200 || result.maxHealth == 100;
 	result.isEnemy = result.maxHealth == 240 || result.maxHealth > 250;
+
+	result.ActorIncapacitated = result.ptrToIncapacitatedBy != nullptr;
+	result.ActorTakenHostage = result.ptrToTakenHostageBy != nullptr;
 
 	result.isValid = true;
 
@@ -337,7 +667,6 @@ void UpdateActorCache(Actors* actor, bool isValid, const ValidatedActorData& dat
 		targetIndex = oldestIndex;
 	}
 
-	// Actualizar entrada de cach�
 	ActorCacheEntry& entry = actorCache[targetIndex];
 	entry.actorPtr = actor;
 	entry.isValid = isValid;

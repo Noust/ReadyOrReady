@@ -118,6 +118,14 @@ typedef struct
     DWORD A;
 }RGBA;
 
+std::string WideToString(const wchar_t* wide) {
+    if (!wide) return "";
+    int size = WideCharToMultiByte(CP_UTF8, 0, wide, -1, nullptr, 0, nullptr, nullptr);
+    std::string str(size - 1, 0);
+    WideCharToMultiByte(CP_UTF8, 0, wide, -1, &str[0], size, nullptr, nullptr);
+    return str;
+}
+
 std::string stringToUTF8(const std::string& str) {
     int nwLen = ::MultiByteToWideChar(CP_ACP, 0, str.c_str(), -1, NULL, 0);
     wchar_t* pwBuf = new wchar_t[nwLen + 1];

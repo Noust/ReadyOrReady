@@ -21,7 +21,6 @@ void drawItem() {
 void renderEsp() {
 	if (USettings.esp) {
 		if (success) {
-			float LHealth;
 			if (read<float>(adresses.characterHealth + 0xD8, LHealth)) {
 				if (LHealth > 1) {
 					for (int i = 0; i < 254; i++) {
@@ -29,7 +28,7 @@ void renderEsp() {
 						
 						// OPCIÓN 1: Obtener todos los datos con caché inteligente (recomendado)
 						ValidatedActorData actorData = SafeGetActorCompleteData(aactor);
-						
+
 						// OPCIÓN 2: Si solo necesitas posición actualizada frecuentemente:
 						// fvector freshPosition;
 						// if (FastGetActorPosition(aactor, freshPosition)) {
@@ -77,7 +76,7 @@ void renderEsp() {
 								drawbox(feetpos, height, height / 4, USettings.Squad_Box_Esp_Color, USettings.Box_Esp_Thickness);
 						}
 
-						if (USettings.HealthBar_ESP) {
+						if (USettings.HealthBar_ESP && USettings.Show_Health) {
 							float healthRatio = actorData.health / actorData.maxHealth;
 							drawhealthbar(feetpos, height * healthRatio, height / 3.6f, HealthBarColor(actorData), USettings.HealthBar_Esp_Thickness);
 						}
@@ -90,31 +89,7 @@ void renderEsp() {
 							if (actorData.isSquad)
 								DrawCornerEsp(height / 2, height, feetpos, USettings.Squad_CornerBox_Esp_Color, USettings.Box_CornerEsp_Thickness);
 						}
-						if (USettings.Distance_Esp) {
-							fvector toppos = actorHeadLocation;
-							fvector bottompos = actorFeetLocation;
 
-							toppos.z += 95;
-							bottompos.z -= 10;
-
-							fvector2d topActor = w2s(toppos);
-							fvector2d bottomActor = w2s(bottompos);
-
-							bool topVisible = topActor.x >= 0 && topActor.x <= widthscreen && 
-								topActor.y >= 0 && topActor.y <= heightscreen;
-
-							float yOffset = 0;
-							if (USettings.Distance_Esp) {
-								sprintf_s(distStr, "[%0.fm]", distance);
-								if (actorData.isCivilian)
-									DrawString(bottomActor, USettings.Civilian_Distance_Esp_Color, USettings.Text_Size, distStr);
-								if (actorData.isEnemy)
-									DrawString(bottomActor, USettings.Enemy_Distance_Esp_Color, USettings.Text_Size, distStr);
-								if (actorData.isSquad)
-									DrawString(bottomActor, USettings.Squad_Distance_Esp_Color, USettings.Text_Size, distStr);
-								yOffset += 15;
-							}
-						}
 						if (USettings.Box3D_Esp) {
 							if (actorData.isCivilian)
 								Draw3DBox(actorData, USettings.Civilian_Box3D_Esp_Color, USettings.Box3D_Esp_Thickness, USettings.Box3D_Width);
@@ -123,12 +98,134 @@ void renderEsp() {
 							if (actorData.isSquad)
 								Draw3DBox(actorData, USettings.Squad_Box3D_Esp_Color, USettings.Box3D_Esp_Thickness, USettings.Box3D_Width);
 						}
+
+						if (USettings.Distance_Esp || USettings.Name_ESP || USettings.Type_ESP || USettings.GunName_Esp || USettings.Show_Health) {
+							fvector toppos = actorHeadLocation;
+							fvector bottompos = actorFeetLocation;
+
+							toppos.z += 5;
+							bottompos.z -= 10;
+
+							fvector2d topActor = w2s(toppos);
+							fvector2d bottomActor = w2s(bottompos);
+
+							bool topVisible = topActor.x >= 0 && topActor.x <= widthscreen && 
+								topActor.y >= 0 && topActor.y <= heightscreen;
+
+							if (topVisible) {
+								if (USettings.Type_ESP) {
+									topActor.y -= 15;
+									if (actorData.isCivilian)
+										DrawString(topActor, USettings.Civilian_Type_ESP_Color, USettings.Text_Size, "Civilian");
+									if (actorData.isEnemy)
+										DrawString(topActor, USettings.Enemy_Type_ESP_Color, USettings.Text_Size, "Enemy");
+									if (actorData.isSquad)
+										DrawString(topActor, USettings.Squad_Type_ESP_Color, USettings.Text_Size, "Squad");
+								}
+
+								if (USettings.Name_ESP) {
+									topActor.y -= 15;
+									if (actorData.playerName[0] != L'\0')
+										DrawString(topActor, USettings.Squad_Name_ESP_Color, USettings.Text_Size, WideToString(actorData.playerName).c_str());
+								}
+							}
+
+							if (USettings.Distance_Esp) {
+								sprintf_s(distStr, "[%0.fm]", distance);
+								if (actorData.isCivilian)
+									DrawString(bottomActor, USettings.Civilian_Distance_Esp_Color, USettings.Text_Size, distStr);
+								if (actorData.isEnemy)
+									DrawString(bottomActor, USettings.Enemy_Distance_Esp_Color, USettings.Text_Size, distStr);
+								if (actorData.isSquad)
+									DrawString(bottomActor, USettings.Squad_Distance_Esp_Color, USettings.Text_Size, distStr);
+							}
+							
+							if (USettings.GunName_Esp) {
+								if (actorData.weaponName[0] != L'\0') {
+									bottomActor.y += 15;
+									std::string weaponDisplay = WideToString(actorData.weaponName);
+									
+									if (USettings.Show_GunAmmo) {
+										weaponDisplay += " [" + std::to_string(actorData.weaponAmmo) + "]";
+									}
+									
+									if (USettings.Show_GunAmmoType) {
+										std::string ammoType = (actorData.weaponAmmoType == 0) ? "AP" : "JHP";
+										weaponDisplay += " (" + ammoType + ")";
+									}
+									
+									if (actorData.isSquad)
+										DrawString(bottomActor, USettings.Squad_GunName_Color, USettings.Text_Size, weaponDisplay.c_str());
+									if (actorData.isEnemy)
+										DrawString(bottomActor, USettings.Enemy_GunName_Color, USettings.Text_Size, weaponDisplay.c_str());
+								}
+							}
+
+							if (USettings.Show_Health && (USettings.Show_headHealth || USettings.Show_leftArmHealth || USettings.Show_leftLegHealth || USettings.Show_rightArmHealth || USettings.Show_rightLegHealth)) {
+								bottomActor.y += 15;
+
+								if (USettings.Show_headHealth) {
+									std::string headHealthText = "Head: " + std::to_string((int)actorData.headHealth) + "/" + std::to_string((int)actorData.headMaxHealth);
+									if (actorData.isSquad)
+										DrawString(bottomActor, USettings.Squad_Health_Esp_Color, USettings.Text_Size, headHealthText.c_str());
+									if (actorData.isCivilian)
+										DrawString(bottomActor, USettings.Civilian_Health_Esp_Color, USettings.Text_Size, headHealthText.c_str());
+									if (actorData.isEnemy)
+										DrawString(bottomActor, USettings.Enemy_Health_Esp_Color, USettings.Text_Size, headHealthText.c_str());
+									bottomActor.y += 15;
+								}
+
+								if (USettings.Show_leftArmHealth) {
+									std::string leftArmHealthText = "L.Arm: " + std::to_string((int)actorData.leftArmHealth) + "/" + std::to_string((int)actorData.leftArmMaxHealth);
+									if (actorData.isSquad)
+										DrawString(bottomActor, USettings.Squad_Health_Esp_Color, USettings.Text_Size, leftArmHealthText.c_str());
+									if (actorData.isCivilian)
+										DrawString(bottomActor, USettings.Civilian_Health_Esp_Color, USettings.Text_Size, leftArmHealthText.c_str());
+									if (actorData.isEnemy)
+										DrawString(bottomActor, USettings.Enemy_Health_Esp_Color, USettings.Text_Size, leftArmHealthText.c_str());
+									bottomActor.y += 15;
+								}
+
+								if (USettings.Show_rightArmHealth) {
+									std::string rightArmHealthText = "R.Arm: " + std::to_string((int)actorData.rightArmHealth) + "/" + std::to_string((int)actorData.rightArmMaxHealth);
+									if (actorData.isSquad)
+										DrawString(bottomActor, USettings.Squad_Health_Esp_Color, USettings.Text_Size, rightArmHealthText.c_str());
+									if (actorData.isCivilian)
+										DrawString(bottomActor, USettings.Civilian_Health_Esp_Color, USettings.Text_Size, rightArmHealthText.c_str());
+									if (actorData.isEnemy)
+										DrawString(bottomActor, USettings.Enemy_Health_Esp_Color, USettings.Text_Size, rightArmHealthText.c_str());
+									bottomActor.y += 15;
+								}
+
+								if (USettings.Show_leftLegHealth) {
+									std::string leftLegHealthText = "L.Leg: " + std::to_string((int)actorData.leftLegHealth) + "/" + std::to_string((int)actorData.leftLegMaxHealth);
+									if (actorData.isSquad)
+										DrawString(bottomActor, USettings.Squad_Health_Esp_Color, USettings.Text_Size, leftLegHealthText.c_str());
+									if (actorData.isCivilian)
+										DrawString(bottomActor, USettings.Civilian_Health_Esp_Color, USettings.Text_Size, leftLegHealthText.c_str());
+									if (actorData.isEnemy)
+										DrawString(bottomActor, USettings.Enemy_Health_Esp_Color, USettings.Text_Size, leftLegHealthText.c_str());
+									bottomActor.y += 15;
+								}
+
+								if (USettings.Show_rightLegHealth) {
+									std::string rightLegHealthText = "R.Leg: " + std::to_string((int)actorData.rightLegHealth) + "/" + std::to_string((int)actorData.rightLegMaxHealth);
+									if (actorData.isSquad)
+										DrawString(bottomActor, USettings.Squad_Health_Esp_Color, USettings.Text_Size, rightLegHealthText.c_str());
+									if (actorData.isCivilian)
+										DrawString(bottomActor, USettings.Civilian_Health_Esp_Color, USettings.Text_Size, rightLegHealthText.c_str());
+									if (actorData.isEnemy)
+										DrawString(bottomActor, USettings.Enemy_Health_Esp_Color, USettings.Text_Size, rightLegHealthText.c_str());
+									bottomActor.y += 15;
+								}
+							}
+						}
 					}
 				}
 			}
 		}
 	}
-	if (USettings.DrawCrosshair) {
+	if (USettings.DrawCrosshair && LHealth > 1) {
 		bool shouldDraw = !USettings.whennotaiming && !GetAsyncKeyState(VK_RBUTTON);
 		if (shouldDraw) {
 			fvector2d screenCenter{ widthscreen / 2, heightscreen / 2 };
@@ -369,11 +466,17 @@ void renderMenu() {
 			}
 
 			// Player Info ESP
-			ImGui::Checkbox("Show Names", &USettings.Name_ESP);
+			ImGui::Checkbox("Show Player Names", &USettings.Name_ESP);
 			if (USettings.Name_ESP) {
-				ImGui::ColorEdit3("Enemy Name Color", (float*)&USettings.Enemy_Name_ESP_Color);
-				ImGui::ColorEdit3("Civilian Name Color", (float*)&USettings.Civilian_Name_ESP_Color);
-				ImGui::ColorEdit3("Team Name Color", (float*)&USettings.Squad_Name_ESP_Color);
+				ImGui::ColorEdit3("Player Name Color", (float*)&USettings.Squad_Name_ESP_Color);
+				ImGui::Separator();
+			}
+
+			ImGui::Checkbox("Show Types", &USettings.Type_ESP);
+			if (USettings.Type_ESP) {
+				ImGui::ColorEdit3("Player Type Color", (float*)&USettings.Squad_Type_ESP_Color);
+				ImGui::ColorEdit3("Enemy Type Color", (float*)&USettings.Enemy_Type_ESP_Color);
+				ImGui::ColorEdit3("Civilian Type Color", (float*)&USettings.Civilian_Type_ESP_Color);
 				ImGui::Separator();
 			}
 
@@ -390,7 +493,11 @@ void renderMenu() {
 			ImGui::Checkbox("Show Weapon", &USettings.GunName_Esp);
 			if (USettings.GunName_Esp) {
 				ImGui::ColorEdit3("Enemy Weapon Color", (float*)&USettings.Enemy_GunName_Color);
-				ImGui::ColorEdit3("Team Weapon Color", (float*)&USettings.Squad_GunName_Color);
+				ImGui::ColorEdit3("Squad Weapon Color", (float*)&USettings.Squad_GunName_Color);
+				ImGui::Separator();
+				ImGui::Text("Weapon Info");
+				ImGui::Checkbox("Show Weapon Ammo", &USettings.Show_GunAmmo);
+				ImGui::Checkbox("Show Weapon Ammo Type", &USettings.Show_GunAmmoType);
 				ImGui::Separator();
 			}
 
@@ -402,7 +509,20 @@ void renderMenu() {
 			//	ImGui::Separator();
 			//}
 
-			ImGui::Checkbox("Health Bar", &USettings.HealthBar_ESP);
+			ImGui::Checkbox("Show Health", &USettings.Show_Health);
+			if (USettings.Show_Health) {
+				ImGui::Separator();
+				ImGui::Checkbox("Health Bar", &USettings.HealthBar_ESP);
+				ImGui::Text("Especific Health Info");
+				ImGui::Checkbox("Show Head Health", &USettings.Show_headHealth);
+				ImGui::Checkbox("Show Left Arm Health", &USettings.Show_leftArmHealth);
+				ImGui::Checkbox("Show Right Arm Health", &USettings.Show_rightArmHealth);
+				ImGui::Checkbox("Show Left Leg Health", &USettings.Show_leftLegHealth);
+				ImGui::Checkbox("Show Right Leg Health", &USettings.Show_rightLegHealth);
+				ImGui::ColorEdit3("Enemy Halth Color", (float*)&USettings.Enemy_Health_Esp_Color);
+				ImGui::ColorEdit3("Civilian Halth Color", (float*)&USettings.Civilian_Health_Esp_Color);
+				ImGui::ColorEdit3("Team Halth Color", (float*)&USettings.Squad_Health_Esp_Color);
+			}
 
 			ImGui::Spacing();
 			ImGui::Separator();
@@ -538,8 +658,6 @@ void renderMenu() {
 			USettings.Squad_CornerBox_Esp_Color = { 0,0,255 };
 			USettings.Box_CornerEsp_Thickness = 0;
 			USettings.CornerBox_ESP = false;
-			USettings.Enemy_Name_ESP_Color = { 255,255,255 };
-			USettings.Civilian_Name_ESP_Color = { 255,255,255 };
 			USettings.Squad_Name_ESP_Color = { 255,255,255 };
 			USettings.Name_ESP = false;
 			USettings.Enemy_Distance_Esp_Color = { 255,0,0 };

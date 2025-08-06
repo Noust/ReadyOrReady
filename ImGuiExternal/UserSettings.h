@@ -12,7 +12,16 @@ namespace CSettings {
 		bool Show_Squad = true;
 
 		int HealthBar_Esp_Thickness = 2;
-		bool HealthBar_ESP = false;
+		bool HealthBar_ESP = true;
+		bool Show_headHealth = false;
+		bool Show_leftArmHealth = false;
+		bool Show_leftLegHealth = false;
+		bool Show_rightArmHealth = false;
+		bool Show_rightLegHealth = false;
+		ImColor Enemy_Health_Esp_Color = { 255,0,0 };
+		ImColor Civilian_Health_Esp_Color = { 0,255,0 };
+		ImColor Squad_Health_Esp_Color = { 0,0,255 };
+		bool Show_Health = false;
 
 		ImColor Enemy_Box_Esp_Color = { 255,0,0 };
 		ImColor Civilian_Box_Esp_Color = { 0,255,0 };
@@ -26,10 +35,13 @@ namespace CSettings {
 		int Box_CornerEsp_Thickness = 0;
 		bool CornerBox_ESP = false;
 
-		ImColor Enemy_Name_ESP_Color = { 255,255,255 };
-		ImColor Civilian_Name_ESP_Color = { 255,255,255 };
 		ImColor Squad_Name_ESP_Color = { 255,255,255 };
 		bool Name_ESP = false;
+
+		ImColor Squad_Type_ESP_Color = { 0,0,255 };
+		ImColor Enemy_Type_ESP_Color = { 255,0,0 };
+		ImColor Civilian_Type_ESP_Color = { 0,255,0 };
+		bool Type_ESP = false;
 
 		ImColor Enemy_Distance_Esp_Color = { 255,0,0 };
 		ImColor Civilian_Distance_Esp_Color = { 0,255,0 };
@@ -51,6 +63,8 @@ namespace CSettings {
 
 		ImColor Enemy_GunName_Color = { 255,0,0 };
 		ImColor Squad_GunName_Color = { 0,0,255 };
+		bool Show_GunAmmo = false;
+		bool Show_GunAmmoType = false;
 		bool GunName_Esp = false;
 
 		ImColor Enemy_Box3D_Esp_Color = { 255,0,0 };

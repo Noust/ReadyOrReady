@@ -4,6 +4,7 @@ bool success = false;
 bool spaceKeyPressed = false;
 bool defaultv = false;
 char distStr[32];
+float LHealth;
 
 class cheats {
 public:
