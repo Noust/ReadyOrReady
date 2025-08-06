@@ -28,7 +28,6 @@ double heightscreen;
 #include "vector.h"
 #include "UserSettings.h"
 #include "FileManager.h"
-#include "Overlay.hpp"
 #include "WorldToScreen.hpp"
 
 #define P(Addr,bytes,size) Patch((BYTE*)Addr,(BYTE*)bytes,size)
@@ -39,5 +38,7 @@ double heightscreen;
 #include "hooks.h"
 #define aactor Actor[i]
 #include "reader.hpp"
+#include "Actor_Manager.h"
+#include "Overlay.hpp"
 #include "cheats.h"
 #include "render.hpp"

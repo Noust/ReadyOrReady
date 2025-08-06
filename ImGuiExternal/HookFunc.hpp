@@ -12,9 +12,7 @@ enum offset {
 	root_component = 0x1A0,
 	character_health = 0x908,
 	camera_manager = 0x350,
-	camera_cache = 0x1330,
-	game_state = 0x158,
-	allai_actors = 0x5F8
+	camera_cache = 0x1330
 };
 //"ReadyOrNotSteam-Win64-Shipping.exe" + 2996840
 //"ReadyOrNotSteam-Win64-Shipping.exe"+2EE2CEF

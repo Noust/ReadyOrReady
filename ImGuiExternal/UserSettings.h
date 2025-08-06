@@ -8,12 +8,75 @@ namespace CSettings {
 		//esp
 		bool esp = false;
 		bool Show_Enemy = true;
+		bool Show_Civilian = true;
 		bool Show_Squad = true;
+
+		int HealthBar_Esp_Thickness = 2;
+		bool HealthBar_ESP = false;
+
+		ImColor Enemy_Box_Esp_Color = { 255,0,0 };
+		ImColor Civilian_Box_Esp_Color = { 0,255,0 };
+		ImColor Squad_Box_Esp_Color = { 0,0,255 };
+		int Box_Esp_Thickness = 0;
+		bool Box_ESP = false;
+
+		ImColor Enemy_CornerBox_Esp_Color = { 255,0,0 };
+		ImColor Civilian_CornerBox_Esp_Color = { 0,255,0 };
+		ImColor Squad_CornerBox_Esp_Color = { 0,0,255 };
+		int Box_CornerEsp_Thickness = 0;
+		bool CornerBox_ESP = false;
+
+		ImColor Enemy_Name_ESP_Color = { 255,255,255 };
+		ImColor Civilian_Name_ESP_Color = { 255,255,255 };
+		ImColor Squad_Name_ESP_Color = { 255,255,255 };
+		bool Name_ESP = false;
+
+		ImColor Enemy_Distance_Esp_Color = { 255,0,0 };
+		ImColor Civilian_Distance_Esp_Color = { 0,255,0 };
+		ImColor Squad_Distance_Esp_Color = { 0,0,255 };
+		bool Distance_Esp = false;
+
+		fvector2d SnaplLine_Esp_Start_Point = { widthscreen / 2,heightscreen };
+		bool SnaplLine_Esp_End_Point = false;
+		ImColor Enemy_SnaplLine_Esp_Color = { 255,0,0 };
+		ImColor Civilian_SnaplLine_Esp_Color = { 0,255,0 };
+		ImColor Squad_SnaplLine_Esp_Color = { 0,0,255 };
+		int SnaplLine_Esp_Thickness = 0;
+		bool SnaplLine_Esp = false;
+
+		ImColor Enemy_FilledBox_Esp_Color = { 0,0,0,70 };
+		ImColor Civilian_FilledBox_Esp_Color = { 0,0,0,70 };
+		ImColor Squad_FilledBox_Esp_Color = { 0,0,0,70 };
+		bool FilledBox_Esp = false;
+
+		ImColor Enemy_GunName_Color = { 255,0,0 };
+		ImColor Squad_GunName_Color = { 0,0,255 };
+		bool GunName_Esp = false;
+
+		ImColor Enemy_Box3D_Esp_Color = { 255,0,0 };
+		ImColor Civilian_Box3D_Esp_Color = { 0,255,0 };
+		ImColor Squad_Box3D_Esp_Color = { 0,0,255 };
+		int Box3D_Esp_Thickness = 0;
+		bool Box3D_Esp = false;
+		float Box3D_Width = 30;
+
+		int ESP_Distance = 50;
+		float Text_Size = 0.9f;
+
+		bool Night_Mode = false;
+		bool FullBright_Mode = false;
 
 		//visuals
 		bool fov_changer = false;
 		float fov_value = 100.0f;
 		float base_fov_value = 90.0f;
+		bool DrawCrosshair = false;
+		bool whennotaiming = false;
+		ImColor Crosshair_Color = { 255,255,255 };
+		float Crosshair_size = 10;
+		int Crosshair_thickness = 0;
+		bool circle = true;
+		bool Cross = true;
 
 		//movement
 		bool fast_run = false;

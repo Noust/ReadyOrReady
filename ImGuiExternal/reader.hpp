@@ -214,8 +214,6 @@ struct world {
 	DWORD64 rootComponent;
 	DWORD64 characterHealth;
 	DWORD64 cameraManager;
-	DWORD64 gameState;
-	DWORD64 allAiActors;
 };
 world adresses;
 
@@ -229,8 +227,6 @@ bool ReadRootComponent();
 bool ReadCharacterHealth();
 bool ReadCameraManager();
 bool ReadCameraCache();
-bool ReadGameState();
-bool ReadAllAiActors();
 
 bool ReadValues() {
 	if (!ReadUworld()) return false;
@@ -243,8 +239,6 @@ bool ReadValues() {
 	if (!ReadCharacterHealth()) return false;
 	if (!ReadCameraManager()) return false;
 	if (!ReadCameraCache()) return false;
-	if (!ReadGameState()) return false;
-	if (!ReadAllAiActors()) return false;
 	return true;
 }
 
@@ -289,12 +283,4 @@ bool ReadCameraCache() {
 	if (adresses.cameraManager == NULL) return false;
 	POV = *(FMinimalViewInfo*)(adresses.cameraManager + offset::camera_cache);
     return true;
-}
-bool ReadGameState() {
-	if (adresses.uworld == NULL) return false;
-	return read<DWORD64>(adresses.uworld + offset::game_state, adresses.gameState);
-}
-bool ReadAllAiActors() {
-	if (adresses.gameState == NULL) return false;
-	return read<DWORD64>(adresses.gameState + offset::allai_actors, adresses.allAiActors);
 }

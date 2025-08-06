@@ -173,7 +173,7 @@ void DrawCircle(fvector2d pos, int radious, int thickness, ImColor color) {
     }
 }
 
-void DrawCornerEsp(float W, float H, Vector2 pos, ImColor color, int thickness) {
+void DrawCornerEsp(float W, float H, fvector2d pos, ImColor color, int thickness) {
     float lineW = (W / 5);
     float lineH = (H / 6);
 
@@ -188,7 +188,7 @@ void DrawCornerEsp(float W, float H, Vector2 pos, ImColor color, int thickness) 
     DrawLine({ pos.x + W / 2 - lineW, pos.y }, { pos.x + W / 2, pos.y }, color, thickness, false);
 }
 
-void DrawFilledRect(Vector2 pos, float height, float width, ImColor color) {
+void DrawFilledRect(fvector2d pos, float height, float width, ImColor color) {
     ImGui::GetBackgroundDrawList()->AddRectFilled({ pos.x - width,pos.y - height }, { pos.x + width, pos.y }, color);
 }
 
@@ -217,92 +217,91 @@ void DrawString(fvector2d pos, ImColor color, float scale, const char* text) {
     );
 }
 
-void drawhealthbar(Vector2 pos, float height, float width, ImColor color, float thickness) {
+void drawhealthbar(fvector2d pos, float height, float width, ImColor color, float thickness) {
     DrawLine({ pos.x - width,pos.y - height }, { pos.x - width,pos.y }, color, thickness, false);
 }
 
-void drawarmorbar(Vector2 pos, float height, float width, ImColor color, float thickness) {
+void drawarmorbar(fvector2d pos, float height, float width, ImColor color, float thickness) {
     DrawLine({ pos.x + width,pos.y - height }, { pos.x + width,pos.y }, color, thickness, false);
 }
 
-//ImColor HealthBarColor(DWORD64 ent) {
-//    if (E->GetHealth(ent) <= E->GetMaxHealth(ent) && E->GetHealth(ent) > E->GetMaxHealth(ent) * 0.75)
-//        return ImColor(0, 255, 0);
-//    else if (E->GetHealth(ent) <= E->GetMaxHealth(ent) * 0.75 && E->GetHealth(ent) > E->GetMaxHealth(ent) * 0.5)
-//        return ImColor(85, 170, 0);
-//    else if (E->GetHealth(ent) <= E->GetMaxHealth(ent) * 0.5 && E->GetHealth(ent) > E->GetMaxHealth(ent) * 0.25)
-//        return ImColor(170, 85, 0);
-//    else if (E->GetHealth(ent) <= E->GetMaxHealth(ent) * 0.25f && E->GetHealth(ent) > 0)
-//        return ImColor(255, 0, 0);
-//    return ImColor(0, 0, 0, 0);
-//}
+ImColor HealthBarColor(ValidatedActorData actorData) {
+    if (actorData.health <= actorData.maxHealth && actorData.health > actorData.maxHealth * 0.75)
+        return ImColor(0, 255, 0);
+    else if (actorData.health <= actorData.maxHealth * 0.75 && actorData.health > actorData.maxHealth * 0.5)
+        return ImColor(85, 170, 0);
+    else if (actorData.health <= actorData.maxHealth * 0.5 && actorData.health > actorData.maxHealth * 0.25)
+        return ImColor(170, 85, 0);
+    else if (actorData.health <= actorData.maxHealth * 0.25f && actorData.health > 0)
+        return ImColor(255, 0, 0);
+    return ImColor(0, 0, 0, 0);
+}
 
-//void Draw3DBox(Entitys* Ents, ImColor color, float Thickness, float width) {
-//    Vector3 pos1;
-//    Vector3 pos2;
-//    Vector3 pos3;
-//    Vector3 pos4;
-//    Vector3 pos5;
-//    Vector3 pos6;
-//    Vector3 pos7;
-//    Vector3 pos8;
-//    if (E->GetPos(Ents, pos1) && E->GetPos(Ents, pos2) && E->GetPos(Ents, pos3) && E->GetPos(Ents, pos4) && E->GetPos(Ents, pos5) && E->GetPos(Ents, pos6) && E->GetPos(Ents, pos7) && E->GetPos(Ents, pos8)) {
-//        //Bottom Points
-//        pos1.x += width;
-//        pos1.y += width;
-//        pos1.z -= 90;
-//        pos2.x += width;
-//        pos2.y -= width;
-//        pos2.z -= 90;
-//        pos3.x -= width;
-//        pos3.y -= width;
-//        pos3.z -= 90;
-//        pos4.x -= width;
-//        pos4.y += width;
-//        pos4.z -= 90;
-//
-//        //Top Points
-//        pos5.x += width;
-//        pos5.y += width;
-//        pos5.z += 80;
-//        pos6.x += width;
-//        pos6.y -= width;
-//        pos6.z += 80;
-//        pos7.x -= width;
-//        pos7.y -= width;
-//        pos7.z += 80;
-//        pos8.x -= width;
-//        pos8.y += width;
-//        pos8.z += 80;
-//
-//        //to screen
-//        Vector2 posscreen1 = PosToScreen(pos1);
-//        Vector2 posscreen2 = PosToScreen(pos2);
-//        Vector2 posscreen3 = PosToScreen(pos3);
-//        Vector2 posscreen4 = PosToScreen(pos4);
-//
-//        Vector2 posscreen5 = PosToScreen(pos5);
-//        Vector2 posscreen6 = PosToScreen(pos6);
-//        Vector2 posscreen7 = PosToScreen(pos7);
-//        Vector2 posscreen8 = PosToScreen(pos8);
-//
-//        //Draw Top
-//        DrawLine(posscreen1, posscreen2, color, Thickness, true);
-//        DrawLine(posscreen2, posscreen3, color, Thickness, true);
-//        DrawLine(posscreen3, posscreen4, color, Thickness, true);
-//        DrawLine(posscreen4, posscreen1, color, Thickness, true);
-//
-//        DrawLine(posscreen5, posscreen6, color, Thickness, true);
-//        DrawLine(posscreen6, posscreen7, color, Thickness, true);
-//        DrawLine(posscreen7, posscreen8, color, Thickness, true);
-//        DrawLine(posscreen8, posscreen5, color, Thickness, true);
-//
-//        DrawLine(posscreen5, posscreen1, color, Thickness, true);
-//        DrawLine(posscreen6, posscreen2, color, Thickness, true);
-//        DrawLine(posscreen7, posscreen3, color, Thickness, true);
-//        DrawLine(posscreen8, posscreen4, color, Thickness, true);
-//    }
-//}
+void Draw3DBox(ValidatedActorData actorData, ImColor color, float Thickness, float width) {
+    fvector pos1 = actorData.position;
+    fvector pos2 = actorData.position;
+    fvector pos3 = actorData.position;
+    fvector pos4 = actorData.position;
+    fvector pos5 = actorData.position;
+    fvector pos6 = actorData.position;
+    fvector pos7 = actorData.position;
+    fvector pos8 = actorData.position;
+
+    //Bottom Points
+    pos1.x += width;
+    pos1.y += width;
+    pos1.z -= 90;
+    pos2.x += width;
+    pos2.y -= width;
+    pos2.z -= 90;
+    pos3.x -= width;
+    pos3.y -= width;
+    pos3.z -= 90;
+    pos4.x -= width;
+    pos4.y += width;
+    pos4.z -= 90;
+
+    //Top Points
+    pos5.x += width;
+    pos5.y += width;
+    pos5.z += 80;
+    pos6.x += width;
+    pos6.y -= width;
+    pos6.z += 80;
+    pos7.x -= width;
+    pos7.y -= width;
+    pos7.z += 80;
+    pos8.x -= width;
+    pos8.y += width;
+    pos8.z += 80;
+
+    //to screen
+    fvector2d posscreen1 = w2s(pos1);
+    fvector2d posscreen2 = w2s(pos2);
+    fvector2d posscreen3 = w2s(pos3);
+    fvector2d posscreen4 = w2s(pos4);
+
+    fvector2d posscreen5 = w2s(pos5);
+    fvector2d posscreen6 = w2s(pos6);
+    fvector2d posscreen7 = w2s(pos7);
+    fvector2d posscreen8 = w2s(pos8);
+
+    //Draw Top
+    DrawLine(posscreen1, posscreen2, color, Thickness, true);
+    DrawLine(posscreen2, posscreen3, color, Thickness, true);
+    DrawLine(posscreen3, posscreen4, color, Thickness, true);
+    DrawLine(posscreen4, posscreen1, color, Thickness, true);
+
+    DrawLine(posscreen5, posscreen6, color, Thickness, true);
+    DrawLine(posscreen6, posscreen7, color, Thickness, true);
+    DrawLine(posscreen7, posscreen8, color, Thickness, true);
+    DrawLine(posscreen8, posscreen5, color, Thickness, true);
+
+    DrawLine(posscreen5, posscreen1, color, Thickness, true);
+    DrawLine(posscreen6, posscreen2, color, Thickness, true);
+    DrawLine(posscreen7, posscreen3, color, Thickness, true);
+    DrawLine(posscreen8, posscreen4, color, Thickness, true);
+}
 
 void DrawBackgroundAnimation() {
     static std::vector<ImVec2> particles;
