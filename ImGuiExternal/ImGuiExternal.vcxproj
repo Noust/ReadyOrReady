@@ -188,6 +188,7 @@
     <ClInclude Include="Libraries\ImGui\Include\ImGui\imstb_truetype.h" />
     <ClInclude Include="reader.hpp" />
     <ClInclude Include="render.hpp" />
+    <ClInclude Include="Simulate.hpp" />
     <ClInclude Include="UserSettings.h" />
     <ClInclude Include="vector.h" />
     <ClInclude Include="WorldToScreen.hpp" />

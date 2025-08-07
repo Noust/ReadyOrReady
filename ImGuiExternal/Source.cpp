@@ -149,7 +149,8 @@ DWORD WINAPI MainThread(HMODULE hMod) {
 	while (!GetAsyncKeyState(VK_DELETE)) {
 		Sleep(500);
 	}
-
+	disable_all();
+	Sleep(100);
 	c->unload();
 	ImGui_ImplDX9_Shutdown();
 	ImGui_ImplWin32_Shutdown();

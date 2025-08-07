@@ -70,5 +70,6 @@
     <ClInclude Include="render.hpp" />
     <ClInclude Include="hooks.h" />
     <ClInclude Include="Actor_Manager.h" />
+    <ClInclude Include="Simulate.hpp" />
   </ItemGroup>
 </Project>

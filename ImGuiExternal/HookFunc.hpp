@@ -108,38 +108,38 @@ static BYTE* hook_target = nullptr;
 
 LONG WINAPI GetActors_VEHHandler(PEXCEPTION_POINTERS ExceptionInfo);
 
-void VEH_GetActors_Cleanup() {
-    if (hook_target) {
-        HANDLE hThread = GetCurrentThread();
-        if (hThread && hThread != INVALID_HANDLE_VALUE) {
-            CONTEXT ctx = {};
-            ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
-
-            if (GetThreadContext(hThread, &ctx)) {
-                ctx.Dr0 = 0;
-                ctx.Dr7 &= ~(1 << 0);  // Disable Dr0
-                ctx.Dr7 &= ~(3 << 16); // Clear condition bits for Dr0
-                ctx.Dr7 &= ~(3 << 18); // Clear length bits for Dr0
-
-                SetThreadContext(hThread, &ctx);
-            }
-        }
-
-        hook_target = nullptr;
-    }
-
-    if (veh_handle) {
-        if (RemoveVectoredExceptionHandler(veh_handle)) {
-            veh_handle = nullptr;
-        }
-    }
-}
+//void VEH_GetActors_Cleanup() {
+//    if (hook_target) {
+//        HANDLE hThread = GetCurrentThread();
+//        if (hThread && hThread != INVALID_HANDLE_VALUE) {
+//            CONTEXT ctx = {};
+//            ctx.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+//
+//            if (GetThreadContext(hThread, &ctx)) {
+//                ctx.Dr0 = 0;
+//                ctx.Dr7 &= ~(1 << 0);  // Disable Dr0
+//                ctx.Dr7 &= ~(3 << 16); // Clear condition bits for Dr0
+//                ctx.Dr7 &= ~(3 << 18); // Clear length bits for Dr0
+//
+//                SetThreadContext(hThread, &ctx);
+//            }
+//        }
+//
+//        hook_target = nullptr;
+//    }
+//
+//    if (veh_handle) {
+//        if (RemoveVectoredExceptionHandler(veh_handle)) {
+//            veh_handle = nullptr;
+//        }
+//    }
+//}
 
 bool VEH_GetActors_Hook(BYTE* pTarget) {
     if (!pTarget)
         return false;
 
-    VEH_GetActors_Cleanup();
+    /*VEH_GetActors_Cleanup();*/
 
     veh_handle = AddVectoredExceptionHandler(1, GetActors_VEHHandler);
     if (!veh_handle)

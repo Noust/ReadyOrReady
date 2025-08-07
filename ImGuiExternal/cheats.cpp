@@ -8,14 +8,14 @@ void cheats::init() {
 }
 
 void cheats::unload() {
-	VEH_CLEANUP();
+	/*VEH_CLEANUP();*/
 	
 	P(GetAddr(0x2996840), "\xF3\x0F\x11\x89\xA0\x02\x00\x00", 8);
 }
 
 
 void loop() {
-	if (USettings.esp || USettings.fov_changer || USettings.fast_run || USettings.super_run || USettings.jump || USettings.GodMode || USettings.Unlimited_MeleeRange || USettings.GodMode_LastState || USettings.High_FireRate_LastState || USettings.No_Reload_LastState || USettings.Unlimited_MeleeRange_LastState || USettings.Show_Magazines || !defaultv) {
+	if (USettings.esp || USettings.fov_changer || USettings.fast_run || USettings.super_run || USettings.jump || USettings.GodMode || USettings.Unlimited_MeleeRange || USettings.GodMode_LastState || USettings.High_FireRate_LastState || USettings.No_Reload_LastState || USettings.Unlimited_MeleeRange_LastState || USettings.Show_Magazines || USettings.Show_actors || !defaultv) {
 		if (ReadValues())
 			success = true;
 		else

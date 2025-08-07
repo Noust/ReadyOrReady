@@ -1,7 +1,7 @@
 #pragma once
 #include "include.h"
 
-namespace CSettings {
+namespace RonSettings {
 	int MenuWindow = 0;
 
 	struct Settings {
@@ -109,6 +109,7 @@ namespace CSettings {
 		bool Show_Magazines = false;
 
 		//World
+		bool Show_actors = false;
 
 		//movement
 		bool fast_run = false;
@@ -128,4 +129,193 @@ namespace CSettings {
 	inline Settings settings;
 };
 
-#define USettings CSettings::settings
+#define USettings RonSettings::settings
+
+void disable_all() {
+	USettings.esp = false;
+
+	USettings.Show_CurrentHealth = false;
+	USettings.Show_headHealth = false;
+	USettings.Show_leftArmHealth = false;
+	USettings.Show_leftLegHealth = false;
+	USettings.Show_rightArmHealth = false;
+	USettings.Show_rightLegHealth = false;
+	USettings.Show_Health = false;
+
+	USettings.Box_ESP = false;
+
+	USettings.CornerBox_ESP = false;
+
+	USettings.Name_ESP = false;
+
+	USettings.Type_ESP = false;
+
+	USettings.Distance_Esp = false;
+
+	USettings.Status_Esp = false;
+
+	USettings.SnaplLine_Esp_End_Point = false;
+	USettings.SnaplLine_Esp = false;
+
+	USettings.FilledBox_Esp = false;
+
+	USettings.Show_GunAmmo = false;
+	USettings.Show_GunAmmoType = false;
+	USettings.GunName_Esp = false;
+
+	USettings.Box3D_Esp = false;
+
+
+	USettings.Night_Mode = false;
+	USettings.FullBright_Mode = false;
+
+	//visuals
+	USettings.fov_changer = false;
+	USettings.DrawCrosshair = false;
+	USettings.whennotaiming = false;
+
+	//Player
+	USettings.GodMode = false;
+	USettings.GodMode_LastState = false;
+	USettings.Unlimited_MeleeRange = false;
+	USettings.Unlimited_MeleeRange_LastState = false;
+	USettings.No_Reload = false;
+	USettings.No_Reload_LastState = false;
+	USettings.High_FireRate = false;
+	USettings.High_FireRate_LastState = false;
+	USettings.Show_Magazines = false;
+
+	//World
+	USettings.Show_actors = false;
+
+	//movement
+	USettings.fast_run = false;
+	USettings.super_run = false;
+	USettings.jump = false;
+
+	USettings.navigationwindow_animation = false;
+	USettings.optionswindow_animation = false;
+	USettings.OBSBypass = false;
+	USettings.Show_Fps = false;
+}
+
+void default_all() {
+	USettings.esp = false;
+	USettings.Show_Enemy = true;
+	USettings.Show_Civilian = true;
+	USettings.Show_Squad = true;
+
+	USettings.HealthBar_Esp_Thickness = 2;
+	USettings.HealthBar_ESP = true;
+	USettings.Show_CurrentHealth = false;
+	USettings.Show_headHealth = false;
+	USettings.Show_leftArmHealth = false;
+	USettings.Show_leftLegHealth = false;
+	USettings.Show_rightArmHealth = false;
+	USettings.Show_rightLegHealth = false;
+	USettings.Enemy_Health_Esp_Color = { 255,0,0 };
+	USettings.Civilian_Health_Esp_Color = { 0,255,0 };
+	USettings.Squad_Health_Esp_Color = { 0,0,255 };
+	USettings.Show_Health = false;
+
+	USettings.Enemy_Box_Esp_Color = { 255,0,0 };
+	USettings.Civilian_Box_Esp_Color = { 0,255,0 };
+	USettings.Squad_Box_Esp_Color = { 0,0,255 };
+	USettings.Box_Esp_Thickness = 0;
+	USettings.Box_ESP = false;
+
+	USettings.Enemy_CornerBox_Esp_Color = { 255,0,0 };
+	USettings.Civilian_CornerBox_Esp_Color = { 0,255,0 };
+	USettings.Squad_CornerBox_Esp_Color = { 0,0,255 };
+	USettings.Box_CornerEsp_Thickness = 0;
+	USettings.CornerBox_ESP = false;
+
+	USettings.Squad_Name_ESP_Color = { 255,255,255 };
+	USettings.Name_ESP = false;
+
+	USettings.Squad_Type_ESP_Color = { 0,0,255 };
+	USettings.Enemy_Type_ESP_Color = { 255,0,0 };
+	USettings.Civilian_Type_ESP_Color = { 0,255,0 };
+	USettings.Type_ESP = false;
+
+	USettings.Enemy_Distance_Esp_Color = { 255,0,0 };
+	USettings.Civilian_Distance_Esp_Color = { 0,255,0 };
+	USettings.Squad_Distance_Esp_Color = { 0,0,255 };
+	USettings.Distance_Esp = false;
+
+	USettings.Enemy_Status_Esp_Color = { 255,0,0 };
+	USettings.Civilian_Status_Esp_Color = { 0,255,0 };
+	USettings.Status_Esp = false;
+
+	USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2,heightscreen };
+	USettings.SnaplLine_Esp_End_Point = false;
+	USettings.Enemy_SnaplLine_Esp_Color = { 255,0,0 };
+	USettings.Civilian_SnaplLine_Esp_Color = { 0,255,0 };
+	USettings.Squad_SnaplLine_Esp_Color = { 0,0,255 };
+	USettings.SnaplLine_Esp_Thickness = 0;
+	USettings.SnaplLine_Esp = false;
+
+	USettings.Enemy_FilledBox_Esp_Color = { 0,0,0,70 };
+	USettings.Civilian_FilledBox_Esp_Color = { 0,0,0,70 };
+	USettings.Squad_FilledBox_Esp_Color = { 0,0,0,70 };
+	USettings.FilledBox_Esp = false;
+
+	USettings.Enemy_GunName_Color = { 255,0,0 };
+	USettings.Squad_GunName_Color = { 0,0,255 };
+	USettings.Show_GunAmmo = false;
+	USettings.Show_GunAmmoType = false;
+	USettings.GunName_Esp = false;
+
+	USettings.Enemy_Box3D_Esp_Color = { 255,0,0 };
+	USettings.Civilian_Box3D_Esp_Color = { 0,255,0 };
+	USettings.Squad_Box3D_Esp_Color = { 0,0,255 };
+	USettings.Box3D_Esp_Thickness = 0;
+	USettings.Box3D_Esp = false;
+	USettings.Box3D_Width = 30;
+
+	USettings.ESP_Distance = 50;
+	USettings.Text_Size = 0.9f;
+
+	USettings.Night_Mode = false;
+	USettings.FullBright_Mode = false;
+
+	//visuals
+	USettings.fov_changer = false;
+	USettings.fov_value = 100.0f;
+	USettings.base_fov_value = 90.0f;
+	USettings.DrawCrosshair = false;
+	USettings.whennotaiming = false;
+	USettings.Crosshair_Color = { 255,255,255 };
+	USettings.Crosshair_size = 10;
+	USettings.Crosshair_thickness = 0;
+	USettings.circle = true;
+	USettings.Cross = true;
+
+	//Player
+	USettings.GodMode = false;
+	USettings.GodMode_LastState = false;
+	USettings.Unlimited_MeleeRange = false;
+	USettings.Unlimited_MeleeRange_LastState = false;
+	USettings.No_Reload = false;
+	USettings.No_Reload_LastState = false;
+	USettings.High_FireRate = false;
+	USettings.High_FireRate_LastState = false;
+	USettings.Show_Magazines = false;
+
+	//World
+	USettings.Show_actors = false;
+
+	//movement
+	USettings.fast_run = false;
+	USettings.super_run = false;
+	USettings.jump = false;
+
+	USettings.window_animation = true;
+	USettings.navigationwindow_animation = false;
+	USettings.optionswindow_animation = false;
+	USettings.show_watermark = true;
+	USettings.OBSBypass = false;
+	USettings.Show_Fps = false;
+
+	USettings.Backround_Animation = true;
+}

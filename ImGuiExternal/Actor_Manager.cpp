@@ -630,7 +630,7 @@ ValidatedActorData SafeGetActorCompleteData(Actors* actor) {
 
 	result.ActorIncapacitated = result.ptrToIncapacitatedBy != nullptr;
 	result.ActorTakenHostage = result.ptrToTakenHostageBy != nullptr;
-	result.ActorKilled = result.ptrToKilledBy != nullptr;
+	result.ActorKilled = result.ptrToKilledBy != nullptr || result.health < 1;
 
 	result.isValid = true;
 
@@ -692,7 +692,7 @@ bool FastGetActorPosition(Actors* actor, fvector& outPosition) {
 }
 
 void ManageActors() {
-	if (USettings.esp) {
+	if (USettings.esp || USettings.Show_actors) {
 		CleanupInvalidActors();
 
 		if (IsValidActorPointer(ActorsAddr)) {
@@ -713,7 +713,6 @@ void ManageActors() {
 }
 
 bool shouldloop(ValidatedActorData actorData) {
-	if (!success) return false;
 
 	if (!actorData.isValid) return false;
 

@@ -8,7 +8,7 @@ void FManager::ReadSettings() {
         file.seekg(0, std::ios::beg);
 
         // Check if file size matches settings size
-        if (fileSize != sizeof(CSettings::settings)) {
+        if (fileSize != sizeof(RonSettings::settings)) {
             file.close();
             // Delete invalid file and create new one
             std::remove("sarilla.bin");
@@ -17,7 +17,7 @@ void FManager::ReadSettings() {
         }
 
         // Read settings if size matches
-        file.read(reinterpret_cast<char*>(&CSettings::settings), sizeof(CSettings::settings));
+        file.read(reinterpret_cast<char*>(&RonSettings::settings), sizeof(RonSettings::settings));
         file.close();
     }
 }
@@ -26,7 +26,7 @@ void FManager::ReadSettings() {
 void FManager::SaveSettings() {
     std::ofstream file("sarilla.bin", std::ios::binary);
     if (file.is_open()) {
-        file.write(reinterpret_cast<const char*>(&CSettings::settings), sizeof(CSettings::settings));
+        file.write(reinterpret_cast<const char*>(&RonSettings::settings), sizeof(RonSettings::settings));
         file.close();
     }
 }

@@ -34,7 +34,7 @@ double heightscreen;
 
 #define P(Addr,bytes,size) StealthPatch((BYTE*)Addr,(BYTE*)bytes,size)
 #define VEH_GETACTORS(Addr) VEH_GetActors_Hook((BYTE*)Addr)
-#define VEH_CLEANUP() VEH_GetActors_Cleanup()
+//#define VEH_CLEANUP() VEH_GetActors_Cleanup()
 #define GetAddr(Addr) (DWORD64)GetModuleHandleA("ReadyOrNotSteam-Win64-Shipping.exe") + Addr
 
 #include "HookFunc.hpp"
