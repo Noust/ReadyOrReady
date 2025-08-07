@@ -92,4 +92,4 @@ void UpdateActorCache(Actors* actor, bool isValid, const ValidatedActorData& dat
 void InvalidateCacheEntry(size_t index);
 void InvalidateAllCache();
 
-bool shouldloop(ValidatedActorData actorData);
+bool shouldloop(ValidatedActorData actorData, bool aimbot);

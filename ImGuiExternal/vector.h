@@ -114,8 +114,10 @@ public:
 	double x;
 	double y;
 
-
-
+	inline double distance(fvector2d v)
+	{
+		return double(sqrtf(powf(v.x - x, 2.0) + powf(v.y - y, 2.0)));
+	}
 };
 
 

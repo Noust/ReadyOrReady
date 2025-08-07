@@ -102,6 +102,27 @@ namespace RonSettings {
 		bool GodMode_LastState = false;
 		bool Unlimited_MeleeRange = false;
 		bool Unlimited_MeleeRange_LastState = false;
+
+		//gun
+		bool Aimbot = false;
+		float AimFov = 200;
+		double Smooth = 0.7;
+		bool ShowFov = false;
+		int FovThickness = 0;
+		ImColor FovColor = { 255,255,255 };
+		bool ShowTarget = false;
+		int TargetThickness = 0;
+		ImColor TargetColor = { 255,0,0 };
+		bool FilledCircle = false;
+		ImColor FilledCircleColor = { 0,0,0,80 };
+		int AimBotHotKey = 0;
+		int HotKey = VK_RBUTTON;
+		std::vector<int> HotKeyList{ VK_LBUTTON, VK_LMENU, VK_RBUTTON, VK_XBUTTON1, VK_XBUTTON2, VK_CAPITAL, VK_LSHIFT, VK_LCONTROL };// added new button VK_LBUTTON
+
+		inline void SetHotKey(int Index)
+		{
+			HotKey = HotKeyList.at(Index);
+		}
 		bool No_Reload = false;
 		bool No_Reload_LastState = false;
 		bool High_FireRate = false;
@@ -185,6 +206,11 @@ void disable_all() {
 	USettings.High_FireRate_LastState = false;
 	USettings.Show_Magazines = false;
 
+	USettings.Aimbot = false;
+	USettings.ShowFov = false;
+	USettings.ShowTarget = false;
+	USettings.FilledCircle = false;
+
 	//World
 	USettings.Show_actors = false;
 
@@ -200,6 +226,19 @@ void disable_all() {
 }
 
 void default_all() {
+	USettings.Aimbot = false;
+	USettings.AimFov = 200;
+	USettings.Smooth = 0.7;
+	USettings.ShowFov = false;
+	USettings.FovThickness = 0;
+	USettings.FovColor = { 255,255,255 };
+	USettings.ShowTarget = false;
+	USettings.TargetThickness = 0;
+	USettings.TargetColor = { 255,0,0 };
+	USettings.FilledCircle = false;
+	USettings.FilledCircleColor = { 0,0,0,80 };
+	USettings.AimBotHotKey = 0;
+	USettings.HotKey = VK_RBUTTON;
 	USettings.esp = false;
 	USettings.Show_Enemy = true;
 	USettings.Show_Civilian = true;

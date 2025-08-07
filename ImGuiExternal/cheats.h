@@ -18,4 +18,10 @@ public:
 };
 cheats* c;
 
+void AimBot(fvector AimPos);
+
 void loop();
+
+void aimbot(int index);
+
+int FindClosestEnemy();

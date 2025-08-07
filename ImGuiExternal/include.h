@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <TlHelp32.h>
 #include <vector>
+#include <thread>
 #include <dwmapi.h>
 #include <fstream>
 #include <filesystem>

@@ -692,7 +692,7 @@ bool FastGetActorPosition(Actors* actor, fvector& outPosition) {
 }
 
 void ManageActors() {
-	if (USettings.esp || USettings.Show_actors) {
+	if (USettings.esp || USettings.Show_actors || USettings.Aimbot) {
 		CleanupInvalidActors();
 
 		if (IsValidActorPointer(ActorsAddr)) {
@@ -712,9 +712,11 @@ void ManageActors() {
 	}
 }
 
-bool shouldloop(ValidatedActorData actorData) {
+bool shouldloop(ValidatedActorData actorData, bool aimbot) {
 
 	if (!actorData.isValid) return false;
+
+	if (aimbot && (actorData.isSquad || actorData.isCivilian)) return false;
 
 	if (actorData.ActorKilled && actorData.reportedComplete) return false;
 

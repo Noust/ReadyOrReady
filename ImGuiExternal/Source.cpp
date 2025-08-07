@@ -50,6 +50,14 @@ void mainLoop() {
 		}
 
 		renderImGui();
+		if (!isMenuVisible) {
+			if (USettings.Aimbot) {
+				int i = FindClosestEnemy();
+				if (i == 1000)
+					continue;
+				aimbot(i);
+			}
+		}
 	}
 }
 

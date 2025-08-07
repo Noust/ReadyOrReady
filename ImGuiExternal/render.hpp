@@ -37,7 +37,7 @@ void renderEsp() {
 					//     // Usar freshPosition para movimiento más fluido
 					// }
 
-					if (!shouldloop(actorData)) continue;
+					if (!shouldloop(actorData, false)) continue;
 
 					double distance = POV.Location.distance(actorData.position) / 100;
 
@@ -273,31 +273,64 @@ void renderEsp() {
 					sprintf_s(HealthStr, "Current HP: %.0f", LHealth);
 					DrawString({ 60, 25 }, ImColor(255, 255, 255), 1, HealthStr);
 				}
+				if (USettings.DrawCrosshair) {
+					bool shouldDraw = !USettings.whennotaiming && !GetAsyncKeyState(VK_RBUTTON);
+					if (shouldDraw) {
+						fvector2d screenCenter{ widthscreen / 2, heightscreen / 2 };
+						float size = USettings.Crosshair_size;
+						float thickness = USettings.Crosshair_thickness;
+						ImColor color = USettings.Crosshair_Color;
+
+						if (USettings.Cross) {
+							DrawLine(
+								{ screenCenter.x, screenCenter.y - size - 0.5f },
+								{ screenCenter.x, screenCenter.y + size - 0.5f },
+								color, thickness, false
+							);
+							DrawLine(
+								{ screenCenter.x - size - 0.5f, screenCenter.y },
+								{ screenCenter.x + size - 0.5f, screenCenter.y },
+								color, thickness, false
+							);
+						}
+						if (USettings.circle) {
+							DrawCircle(screenCenter, size, thickness, color);
+						}
+					}
+				}
 			}
 		}
 	}
-	if (USettings.DrawCrosshair && LHealth > 1) {
-		bool shouldDraw = !USettings.whennotaiming && !GetAsyncKeyState(VK_RBUTTON);
-		if (shouldDraw) {
-			fvector2d screenCenter{ widthscreen / 2, heightscreen / 2 };
-			float size = USettings.Crosshair_size;
-			float thickness = USettings.Crosshair_thickness;
-			ImColor color = USettings.Crosshair_Color;
+	if (USettings.Aimbot) {
+		if (success) {
+			float LHealth;
+			if (read<float>(adresses.characterHealth + 0xD8, LHealth)) {
+				if (LHealth > 1) {
+					if (USettings.ShowFov || USettings.FilledCircle) {
+						ImVec2 screenCenter{ widthscreen / 2, heightscreen / 2 };
+						if (USettings.ShowFov) {
+							DrawCircle({ widthscreen / 2, heightscreen / 2 }, USettings.AimFov, USettings.FovThickness, USettings.FovColor);
+						}
+						if (USettings.FilledCircle) {
+							ImGui::GetBackgroundDrawList()->AddCircleFilled(screenCenter, USettings.AimFov, USettings.FilledCircleColor);
+						}
+					}
 
-			if (USettings.Cross) {
-				DrawLine(
-					{ screenCenter.x, screenCenter.y - size - 0.5f },
-					{ screenCenter.x, screenCenter.y + size - 0.5f },
-					color, thickness, false
-				);
-				DrawLine(
-					{ screenCenter.x - size - 0.5f, screenCenter.y },
-					{ screenCenter.x + size - 0.5f, screenCenter.y },
-					color, thickness, false
-				);
-			}
-			if (USettings.circle) {
-				DrawCircle(screenCenter, size, thickness, color);
+					if (USettings.ShowTarget) {
+						int closestEnemyIndex = FindClosestEnemy();
+						if (closestEnemyIndex != 1000) {
+							if (Actor[closestEnemyIndex] != nullptr) {
+
+								ValidatedActorData actorData = SafeGetActorCompleteData(Actor[closestEnemyIndex]);
+
+								fvector aimPos = actorData.position;
+
+								fvector2d screenPos = w2s(aimPos);
+								DrawLine({ widthscreen / 2, heightscreen / 2 }, screenPos, USettings.TargetColor, USettings.TargetThickness, true);
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -395,6 +428,36 @@ void renderMenu() {
 		}
 		USettings.Unlimited_MeleeRange_LastState = USettings.Unlimited_MeleeRange;
 		ImGui::Text("Gun Settings");
+
+		ImGui::Checkbox("Enable Aimbot", &USettings.Aimbot);
+		if (USettings.Aimbot) {
+			if (ImGui::Combo("Aim Key", &USettings.AimBotHotKey, "LBUTTON\0MENU\0RBUTTON\0XBUTTON1\0XBUTTON2\0CAPITAL\0SHIFT\0CONTROL"))
+				USettings.SetHotKey(USettings.AimBotHotKey);
+
+			ImGui::Text("Core Settings");
+
+			double minVal = 0.4;
+			double maxValX = 0.8f;
+
+			ImGui::SliderScalar("Smoothness", ImGuiDataType_Double, &USettings.Smooth, &minVal, &maxValX);
+			ImGui::SliderFloat("FOV", &USettings.AimFov, 10, 1920);
+
+			ImGui::Text("Visual Feedback");
+			ImGui::Checkbox("Show FOV", &USettings.ShowFov);
+			if (USettings.ShowFov) {
+				ImGui::SliderInt("FOV Circle Thickness", &USettings.FovThickness, 0, 10);
+				ImGui::ColorEdit3("FOV Circle Color", (float*)&USettings.FovColor);
+				ImGui::Checkbox("Fill FOV Circle", &USettings.FilledCircle);
+				ImGui::ColorEdit3("Fill Color", (float*)&USettings.FilledCircleColor);
+			}
+
+			ImGui::Checkbox("Show Target", &USettings.ShowTarget);
+			if (USettings.ShowTarget) {
+				ImGui::SliderInt("Target Indicator Thickness", &USettings.TargetThickness, 0, 10);
+				ImGui::ColorEdit3("Target Indicator Color", (float*)&USettings.TargetColor);
+			}
+			ImGui::Separator();
+		}
 		ImGui::Checkbox("Inifinite Ammo", &USettings.No_Reload);
 		if (USettings.No_Reload && success) {
 			setBooleanBit(adresses.lastweapon, 0x162C, 0, true);
@@ -438,7 +501,7 @@ void renderMenu() {
 		}
 		USettings.High_FireRate_LastState = USettings.High_FireRate;
 		ImGui::Checkbox("Show Magazines", &USettings.Show_Magazines);
-		if (USettings.Show_Magazines && success) {
+		if (USettings.Show_Magazines && RonSettings::MenuWindow == 1 && success) {
 			int numMagazines;
 			if (read<int>(adresses.lastweapon + (offset::magazines + sizeof(uintptr_t)), numMagazines)) {
 				ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
@@ -446,7 +509,12 @@ void renderMenu() {
 				ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.15f, 0.15f, 0.15f, 0.9f));
 				ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.28f, 0.28f, 0.28f, 0.8f));
 				
-				if (ImGui::BeginChild("##magazines_window", ImVec2(0, 190), true, ImGuiWindowFlags_NoScrollbar)) {
+				// Calculate dynamic height based on content
+				float baseHeight = 80.0f; // Header, separator, spacing, footer
+				float rowHeight = 25.0f;   // Height per magazine row
+				float dynamicHeight = baseHeight + (numMagazines * rowHeight);
+				
+				if (ImGui::BeginChild("##magazines_window", ImVec2(0, dynamicHeight), true, ImGuiWindowFlags_NoScrollbar)) {
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					ImGui::Text("Magazine Information");
 					ImGui::PopStyleColor();
@@ -872,7 +940,7 @@ void renderMenu() {
 			
 			// Add some padding and limit maximum height
 			baseHeight += 40.0f; // Extra padding
-			float maxHeight = ImGui::GetContentRegionAvail().y - 100.0f; // Leave space for other elements
+			float maxHeight = ImGui::GetContentRegionAvail().y; // Leave space for other elements
 			float finalHeight = (baseHeight < maxHeight) ? baseHeight : maxHeight;
 			
 			if (ImGui::BeginChild("##actors_window", ImVec2(0, finalHeight), true, (baseHeight > maxHeight) ? 0 : ImGuiWindowFlags_NoScrollbar)) {
@@ -888,18 +956,24 @@ void renderMenu() {
 					ImGui::Text("SQUAD MEMBERS (%d)", (int)squadActors.size());
 					ImGui::PopStyleColor();
 
-					// Squad action buttons
+					// Squad action buttons with proper ID scoping
+					ImGui::PushID("squad_actions");
+					
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					if (ImGui::Button("Heal All Squad", ImVec2(120, 0))) {
 						for (auto& actorPair : squadActors) {
-							float maxHealth = actorPair.second.maxHealth;
-							SafeSetActorHealth(actorPair.second.ptrToActor, maxHealth);
+							if (actorPair.second.isValid && actorPair.second.ptrToActor && actorPair.second.isSquad) {
+								float maxHealth = actorPair.second.maxHealth;
+								SafeSetActorHealth(actorPair.second.ptrToActor, maxHealth);
+							}
 						}
 					}
 					ImGui::PopStyleColor(4);
+					
+					ImGui::PopID(); // End squad_actions ID scope
 
 					ImGui::Spacing();
 
@@ -944,7 +1018,14 @@ void renderMenu() {
 							// Weapon info for squad
 							if (actorData.weaponName[0] != L'\0') {
 								std::string weaponDisplay = WideToString(actorData.weaponName);
-								ImGui::Text("Weapon: %s", weaponDisplay.c_str());
+								std::string filteredWeaponDisplay;
+								for (char c : weaponDisplay) {
+									if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+										(c >= '0' && c <= '9') || c == ' ' || c == '-') {
+										filteredWeaponDisplay += c;
+									}
+								}
+								ImGui::Text("Weapon: %s", filteredWeaponDisplay.c_str());
 								ImGui::Text("Ammo: %d (Type: %d)", actorData.weaponAmmo, actorData.weaponAmmoType);
 							}
 
@@ -991,14 +1072,18 @@ void renderMenu() {
 					ImGui::Text("CIVILIANS (%d)", (int)civilianActors.size());
 					ImGui::PopStyleColor();
 
-					// Civilian action buttons
+					// Civilian action buttons with proper ID scoping
+					ImGui::PushID("civilian_actions");
+					
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					if (ImGui::Button("Arrest All", ImVec2(100, 0))) {
 						for (auto& actorPair : civilianActors) {
-							SafeSetActorArrestStatus(actorPair.second.ptrToActor, true);
+							if (actorPair.second.isValid && actorPair.second.ptrToActor && actorPair.second.isCivilian) {
+								SafeSetActorArrestStatus(actorPair.second.ptrToActor, true);
+							}
 						}
 					}
 					ImGui::PopStyleColor(4);
@@ -1010,7 +1095,9 @@ void renderMenu() {
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					if (ImGui::Button("Force Surrender All", ImVec2(140, 0))) {
 						for (auto& actorPair : civilianActors) {
-							SafeSetActorSurrenderStatus(actorPair.second.ptrToActor, true);
+							if (actorPair.second.isValid && actorPair.second.ptrToActor && actorPair.second.isCivilian) {
+								SafeSetActorSurrenderStatus(actorPair.second.ptrToActor, true);
+							}
 						}
 					}
 					ImGui::PopStyleColor(4);
@@ -1022,10 +1109,14 @@ void renderMenu() {
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					if (ImGui::Button("Kill All", ImVec2(100, 0))) {
 						for (auto& actorPair : civilianActors) {
-							SafeSetActorHealth(actorPair.second.ptrToActor, 0.0f);
+							if (actorPair.second.isValid && actorPair.second.ptrToActor && actorPair.second.isCivilian) {
+								SafeSetActorHealth(actorPair.second.ptrToActor, 0.0f);
+							}
 						}
 					}
 					ImGui::PopStyleColor(4);
+					
+					ImGui::PopID(); // End civilian_actions ID scope
 
 					ImGui::Spacing();
 
@@ -1095,14 +1186,18 @@ void renderMenu() {
 					ImGui::Text("ENEMIES (%d)", (int)enemyActors.size());
 					ImGui::PopStyleColor();
 
-					// Enemy action buttons
+					// Enemy action buttons with proper ID scoping
+					ImGui::PushID("enemy_actions");
+					
 					ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.2f, 0.2f, 0.2f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					if (ImGui::Button("Kill All", ImVec2(100, 0))) {
 						for (auto& actorPair : enemyActors) {
-							SafeSetActorHealth(actorPair.second.ptrToActor, 0.0f);
+							if (actorPair.second.isValid && actorPair.second.ptrToActor && actorPair.second.isEnemy) {
+								SafeSetActorHealth(actorPair.second.ptrToActor, 0.0f);
+							}
 						}
 					}
 					ImGui::PopStyleColor(4);
@@ -1114,7 +1209,9 @@ void renderMenu() {
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					if (ImGui::Button("Arrest All", ImVec2(100, 0))) {
 						for (auto& actorPair : enemyActors) {
-							SafeSetActorArrestStatus(actorPair.second.ptrToActor, true);
+							if (actorPair.second.isValid && actorPair.second.ptrToActor && actorPair.second.isEnemy) {
+								SafeSetActorArrestStatus(actorPair.second.ptrToActor, true);
+							}
 						}
 					}
 					ImGui::PopStyleColor(4);
@@ -1126,10 +1223,14 @@ void renderMenu() {
 					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
 					if (ImGui::Button("Force Surrender All", ImVec2(140, 0))) {
 						for (auto& actorPair : enemyActors) {
-							SafeSetActorSurrenderStatus(actorPair.second.ptrToActor, true);
+							if (actorPair.second.isValid && actorPair.second.ptrToActor && actorPair.second.isEnemy) {
+								SafeSetActorSurrenderStatus(actorPair.second.ptrToActor, true);
+							}
 						}
 					}
 					ImGui::PopStyleColor(4);
+					
+					ImGui::PopID(); // End enemy_actions ID scope
 
 					ImGui::Spacing();
 
@@ -1166,7 +1267,14 @@ void renderMenu() {
 							// Weapon info for enemies
 							if (actorData.weaponName[0] != L'\0') {
 								std::string weaponDisplay = WideToString(actorData.weaponName);
-								ImGui::Text("Weapon: %s", weaponDisplay.c_str());
+								std::string filteredWeaponDisplay;
+								for (char c : weaponDisplay) {
+									if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
+										(c >= '0' && c <= '9') || c == ' ' || c == '-') {
+										filteredWeaponDisplay += c;
+									}
+								}
+								ImGui::Text("Weapon: %s", filteredWeaponDisplay.c_str());
 								ImGui::Text("Ammo: %d (Type: %d)", actorData.weaponAmmo, actorData.weaponAmmoType);
 							}
 
