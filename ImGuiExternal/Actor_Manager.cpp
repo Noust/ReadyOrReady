@@ -740,3 +740,210 @@ bool shouldloop(ValidatedActorData actorData) {
 
 	return true;
 }
+
+bool SafeSetActorHealth(Actor_Data* actorData, float newHealth) {
+	if (!actorData) return false;
+
+	__try {
+		Health_Data* healthData = actorData->PtrToHealth;
+		if (!healthData) return false;
+
+		// Validate memory region
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(healthData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		// Check if memory is writable
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		// Validate health field address bounds
+		if (reinterpret_cast<uintptr_t>(&healthData->Health) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->Health) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		// Validate health value range (reasonable bounds)
+		if (newHealth < 0.0f || newHealth > 10000.0f) {
+			return false;
+		}
+
+		// Perform safe write
+		DWORD oldProtect;
+		if (!VirtualProtect(&healthData->Health, sizeof(float), PAGE_READWRITE, &oldProtect)) {
+			return false;
+		}
+
+		healthData->Health = newHealth;
+
+		VirtualProtect(&healthData->Health, sizeof(float), oldProtect, &oldProtect);
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return false;
+	}
+}
+
+bool SafeSetActorMaxHealth(Actor_Data* actorData, float newMaxHealth) {
+	if (!actorData) return false;
+
+	__try {
+		Health_Data* healthData = actorData->PtrToHealth;
+		if (!healthData) return false;
+
+		// Validate memory region
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(healthData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		// Check if memory is writable
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		// Validate max health field address bounds
+		if (reinterpret_cast<uintptr_t>(&healthData->Max_Health) < reinterpret_cast<uintptr_t>(healthData) ||
+			reinterpret_cast<uintptr_t>(&healthData->Max_Health) >= reinterpret_cast<uintptr_t>(healthData) + sizeof(Health_Data)) {
+			return false;
+		}
+
+		// Validate health value range (reasonable bounds)
+		if (newMaxHealth < 0.0f || newMaxHealth > 10000.0f) {
+			return false;
+		}
+
+		// Perform safe write
+		DWORD oldProtect;
+		if (!VirtualProtect(&healthData->Max_Health, sizeof(float), PAGE_READWRITE, &oldProtect)) {
+			return false;
+		}
+
+		healthData->Max_Health = newMaxHealth;
+
+		VirtualProtect(&healthData->Max_Health, sizeof(float), oldProtect, &oldProtect);
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return false;
+	}
+}
+
+bool SafeSetActorArrestStatus(Actor_Data* actorData, bool newArrestComplete) {
+	if (!actorData) return false;
+
+	__try {
+		// Validate memory region
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(actorData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		// Check if memory is writable
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		// Validate arrest_complete field address bounds
+		if (reinterpret_cast<uintptr_t>(&actorData->arrest_complete) < reinterpret_cast<uintptr_t>(actorData) ||
+			reinterpret_cast<uintptr_t>(&actorData->arrest_complete) >= reinterpret_cast<uintptr_t>(actorData) + sizeof(Actor_Data)) {
+			return false;
+		}
+
+		// Perform safe write
+		DWORD oldProtect;
+		if (!VirtualProtect(&actorData->arrest_complete, sizeof(bool), PAGE_READWRITE, &oldProtect)) {
+			return false;
+		}
+
+		actorData->arrest_complete = newArrestComplete;
+
+		VirtualProtect(&actorData->arrest_complete, sizeof(bool), oldProtect, &oldProtect);
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return false;
+	}
+}
+
+bool SafeSetActorSurrenderStatus(Actor_Data* actorData, bool newSurrenderComplete) {
+	if (!actorData) return false;
+
+	__try {
+		// Validate memory region
+		MEMORY_BASIC_INFORMATION mbi;
+		if (!VirtualQuery(actorData, &mbi, sizeof(mbi))) {
+			return false;
+		}
+
+		// Check if memory is writable
+		if (mbi.State != MEM_COMMIT ||
+			!(mbi.Protect & (PAGE_READWRITE | PAGE_EXECUTE_READWRITE))) {
+			return false;
+		}
+
+		// Validate surrender_complete field address bounds
+		if (reinterpret_cast<uintptr_t>(&actorData->surrender_complete) < reinterpret_cast<uintptr_t>(actorData) ||
+			reinterpret_cast<uintptr_t>(&actorData->surrender_complete) >= reinterpret_cast<uintptr_t>(actorData) + sizeof(Actor_Data)) {
+			return false;
+		}
+
+		// Perform safe write
+		DWORD oldProtect;
+		if (!VirtualProtect(&actorData->surrender_complete, sizeof(bool), PAGE_READWRITE, &oldProtect)) {
+			return false;
+		}
+
+		actorData->surrender_complete = newSurrenderComplete;
+
+		VirtualProtect(&actorData->surrender_complete, sizeof(bool), oldProtect, &oldProtect);
+		return true;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		return false;
+	}
+}
+
+// Convenience function to safely modify actor using ValidatedActorData
+bool SafeModifyActorData(Actors* actor, float newHealth, bool newArrestComplete, bool newSurrenderComplete) {
+	if (!actor) return false;
+
+	Actor_Data* actorData = nullptr;
+	if (!SafeValidateActorData(actor, actorData)) {
+		return false;
+	}
+
+	bool success = true;
+
+	// Set health if provided (use -1.0f to skip)
+	if (newHealth >= 0.0f) {
+		if (!SafeSetActorHealth(actorData, newHealth)) {
+			success = false;
+		}
+	}
+
+	// Set arrest status
+	if (!SafeSetActorArrestStatus(actorData, newArrestComplete)) {
+		success = false;
+	}
+
+	// Set surrender status
+	if (!SafeSetActorSurrenderStatus(actorData, newSurrenderComplete)) {
+		success = false;
+	}
+
+	// Invalidate cache for this actor since we modified it
+	for (size_t i = 0; i < MAX_ACTORS; i++) {
+		if (actorCache[i].actorPtr == actor) {
+			InvalidateCacheEntry(i);
+			break;
+		}
+	}
+
+	return success;
+}

@@ -4,12 +4,13 @@ void cheats::init() {
 	Actors_Hook = GetAddr(0x2EE2CEF);
 	jmpback = Actors_Hook + 14;
 	P(GetAddr(0x2996840), "\x90\x90\x90\x90\x90\x90\x90\x90", 8);
-	H(Actors_Hook, GetActors, 14);
+	VEH_GETACTORS(Actors_Hook);
 }
 
 void cheats::unload() {
+	VEH_CLEANUP();
+	
 	P(GetAddr(0x2996840), "\xF3\x0F\x11\x89\xA0\x02\x00\x00", 8);
-	P(Actors_Hook, "\x0F\x10\x82\x28\x01\x00\x00\x0F\x11\x83\x80\x00\x00\x00", 14);
 }
 
 

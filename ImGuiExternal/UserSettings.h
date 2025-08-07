@@ -108,6 +108,8 @@ namespace CSettings {
 		bool High_FireRate_LastState = false;
 		bool Show_Magazines = false;
 
+		//World
+
 		//movement
 		bool fast_run = false;
 		bool super_run = false;

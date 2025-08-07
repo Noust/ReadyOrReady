@@ -80,6 +80,13 @@ bool SafeGetActorWeaponData(Actor_Data* actorData, uint16_t& outAmmo, uint16_t& 
 ValidatedActorData SafeGetActorCompleteData(Actors* actor);
 bool FastGetActorPosition(Actors* actor, fvector& outPosition);
 
+// Safe write functions
+bool SafeSetActorHealth(Actor_Data* actorData, float newHealth);
+bool SafeSetActorMaxHealth(Actor_Data* actorData, float newMaxHealth);
+bool SafeSetActorArrestStatus(Actor_Data* actorData, bool newArrestComplete);
+bool SafeSetActorSurrenderStatus(Actor_Data* actorData, bool newSurrenderComplete);
+bool SafeModifyActorData(Actors* actor, float newHealth, bool newArrestComplete, bool newSurrenderComplete);
+
 void UpdateActorCache(Actors* actor, bool isValid, const ValidatedActorData& data);
 void UpdateActorCache(Actors* actor, bool isValid, const ValidatedActorData& data, DWORD currentTime);
 void InvalidateCacheEntry(size_t index);

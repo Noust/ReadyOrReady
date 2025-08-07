@@ -330,13 +330,13 @@ void renderMenu() {
 
 	// Navigation buttons
 	float windowWidth = ImGui::GetWindowSize().x;
-	float buttonWidth = (ImGui::GetContentRegionAvail().x - 30) / 4;
-	float spacing = (windowWidth - (buttonWidth * 4)) / 5;
+	float buttonWidth = (ImGui::GetContentRegionAvail().x - 30) / 5;
+	float spacing = (windowWidth - (buttonWidth * 5)) / 6;
 
-	const char* tabs[] = { "Player", "Legit", "Visuals", "Config" };
-	int tabValues[] = { 1, 2, 3, 4 };
+	const char* tabs[] = { "Player", "Legit", "Visuals", "World", "Config" };
+	int tabValues[] = { 1, 2, 3, 5, 4 };
 
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 5; i++) {
 		ImGui::SetCursorPosX(spacing * (i + 1) + buttonWidth * i);
 
 		bool selected = (CSettings::MenuWindow == tabValues[i]);
@@ -348,7 +348,7 @@ void renderMenu() {
 
 		if (selected) ImGui::PopStyleColor();
 
-		if (i < 3) ImGui::SameLine();
+		if (i < 4) ImGui::SameLine();
 	}
 
 	ImGui::EndChild();
@@ -615,12 +615,6 @@ void renderMenu() {
 		//}
 		//ImGui::Checkbox("Night Mode", &USettings.Night_Mode);
 		//ImGui::Checkbox("Full Bright", &USettings.FullBright_Mode);
-		//ImGui::Checkbox("Eye Ray", &USettings.ShowEyeRay);
-		//if (USettings.ShowEyeRay) {
-		//	ImGui::SliderFloat("Eye Ray Length", &USettings.length, 5, 100, "%.0f");
-		//	ImGui::ColorEdit3("Eye Ray Color", (float*)&USettings.EyeRay_Color);
-		//	ImGui::SliderInt("Eye Ray Thickness", &USettings.EyeRay_Thickness, 0, 10);
-		//}
 
 		//ImGui::Spacing();
 		//ImGui::Separator();
@@ -790,6 +784,35 @@ void renderMenu() {
 			ImGui::SliderFloat("Text Size", &USettings.Text_Size, 0.4f, 2.0f, "%.2f");
 
 		}
+
+		ImGui::PopStyleColor();
+	}
+	else if (CSettings::MenuWindow == 5) {
+		ImGui::PushStyleColor(ImGuiCol_Header, ImVec4(0.15f, 0.15f, 0.15f, 1.0f));
+
+		// World Settings Section
+		ImGui::Text("World Settings");
+		ImGui::Checkbox("Night Mode", &USettings.Night_Mode);
+		ImGui::Checkbox("Full Bright", &USettings.FullBright_Mode);
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		// Environment Settings
+		ImGui::Text("Environment Settings");
+		ImGui::Text("Configure world-related options and cheats");
+		
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+
+		// Placeholder for future world options
+		ImGui::Text("Future World Options:");
+		ImGui::BulletText("Weather Control");
+		ImGui::BulletText("Time Control");
+		ImGui::BulletText("Gravity Settings");
+		ImGui::BulletText("Physics Modifications");
 
 		ImGui::PopStyleColor();
 	}
