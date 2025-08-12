@@ -1,16 +1,16 @@
 #include "include.h"
 
 void cheats::init() {
-	Actors_Hook = GetAddr(0x2EE2CEF);
+	Actors_Hook = GetAddr(offset::actors_hook);
 	jmpback = Actors_Hook + 14;
-	P(GetAddr(0x2996840), "\x90\x90\x90\x90\x90\x90\x90\x90", 8);
+	P(GetAddr(offset::fov_hook), "\x90\x90\x90\x90\x90\x90\x90\x90", 8);
 	VEH_GETACTORS(Actors_Hook);
 }
 
 void cheats::unload() {
 	/*VEH_CLEANUP();*/
 	
-	P(GetAddr(0x2996840), "\xF3\x0F\x11\x89\xA0\x02\x00\x00", 8);
+	P(GetAddr(offset::fov_hook), "\xF3\x0F\x11\x89\xA0\x02\x00\x00", 8);
 }
 
 void AimBot(fvector AimPos) {
@@ -47,7 +47,7 @@ void loop() {
 		bool isSpaceCurrentlyPressed = (GetAsyncKeyState(VK_SPACE) & 0x8000) != 0;
 		
 		if (isSpaceCurrentlyPressed && !spaceKeyPressed) {
-			setBooleanBit(adresses.acknowledgedPawn, 0x46C, 2, true);
+			setBooleanBit(adresses.acknowledgedPawn, offset::jump, 2, true);
 			spaceKeyPressed = true;
 		}
 		else if (!isSpaceCurrentlyPressed && spaceKeyPressed) {
@@ -57,8 +57,8 @@ void loop() {
 
 	if (!USettings.fast_run && !USettings.super_run) {
 		if (success && !defaultv) {
-			write<float>(adresses.acknowledgedPawn + 0x280C, 320);
-			write<float>(adresses.acknowledgedPawn + 0x2810, 500);
+			write<float>(adresses.acknowledgedPawn + offset::speed, 320);
+			write<float>(adresses.acknowledgedPawn + offset::acceleration, 500);
 			defaultv = true;
 		}
 	}
@@ -74,7 +74,7 @@ void aimbot(int index) {
 		return;
 
 	float health;
-	read<float>(adresses.characterHealth + 0xD8, health);
+	read<float>(adresses.characterHealth + offset::health, health);
 	if (health < 1)
 		return;
 
@@ -96,7 +96,7 @@ void aimbot(int index) {
 int FindClosestEnemy() {
 	if (!success) return 1000;
 	float LHealth;
-	if (!read<float>(adresses.characterHealth + 0xD8, LHealth)) return 1000;
+	if (!read<float>(adresses.characterHealth + offset::health, LHealth)) return 1000;
 	if (LHealth < 1)
 		return 1000;
 

@@ -23,7 +23,7 @@ void drawItem() {
 
 void renderEsp() {
 	if (USettings.esp) {
-		if (read<float>(adresses.characterHealth + 0xD8, LHealth)) {
+		if (read<float>(adresses.characterHealth + offset::health, LHealth)) {
 			if (LHealth > 1) {
 				for (int i = 0; i < 254; i++) {
 					if (aactor == nullptr) continue;
@@ -304,7 +304,7 @@ void renderEsp() {
 	if (USettings.Aimbot) {
 		if (success) {
 			float LHealth;
-			if (read<float>(adresses.characterHealth + 0xD8, LHealth)) {
+			if (read<float>(adresses.characterHealth + offset::health, LHealth)) {
 				if (LHealth > 1) {
 					if (USettings.ShowFov || USettings.FilledCircle) {
 						ImVec2 screenCenter{ widthscreen / 2, heightscreen / 2 };
@@ -409,22 +409,22 @@ void renderMenu() {
 		ImGui::Text("Player Settings");
 		ImGui::Checkbox("God Mode", &USettings.GodMode);
 		if (USettings.GodMode && success) {
-			setBooleanBit(adresses.acknowledgedPawn, 0x1760, 0, true);
-			setBooleanBit(adresses.characterHealth, 0xF4, 0, true);
-			write<float>(adresses.characterHealth + 0xD8, 999999);
+			setBooleanBit(adresses.acknowledgedPawn, offset::god_mode, 0, true);
+			setBooleanBit(adresses.characterHealth, offset::unlimited_health, 0, true);
+			write<float>(adresses.characterHealth + offset::health, 999999);
 		}
 		else if (!USettings.GodMode && USettings.GodMode_LastState && success) {
-			setBooleanBit(adresses.acknowledgedPawn, 0x1760, 0, false);
-			setBooleanBit(adresses.characterHealth, 0xF4, 0, false);
-			write<float>(adresses.characterHealth + 0xD8, 160);
+			setBooleanBit(adresses.acknowledgedPawn, offset::god_mode, 0, false);
+			setBooleanBit(adresses.characterHealth, offset::unlimited_health, 0, false);
+			write<float>(adresses.characterHealth + offset::health, 160);
 		}
 		USettings.GodMode_LastState = USettings.GodMode;
 		ImGui::Checkbox("Unlimited Melee Range", &USettings.Unlimited_MeleeRange);
 		if (USettings.Unlimited_MeleeRange && success) {
-			write<float>(adresses.acknowledgedPawn + 0x1138, 999999);
+			write<float>(adresses.acknowledgedPawn + offset::melee_reange, 999999);
 		}
 		else if (!USettings.Unlimited_MeleeRange && USettings.Unlimited_MeleeRange_LastState && success) {
-			write<float>(adresses.acknowledgedPawn + 0x1138, 125);
+			write<float>(adresses.acknowledgedPawn + offset::melee_reange, 125);
 		}
 		USettings.Unlimited_MeleeRange_LastState = USettings.Unlimited_MeleeRange;
 		ImGui::Text("Gun Settings");
@@ -460,9 +460,9 @@ void renderMenu() {
 		}
 		ImGui::Checkbox("Inifinite Ammo", &USettings.No_Reload);
 		if (USettings.No_Reload && success) {
-			setBooleanBit(adresses.lastweapon, 0x162C, 0, true);
-			if (c_ammo == 0 && !defaulta) {
-				read<uint16_t>(adresses.magazines + 0x0, c_ammo);
+			setBooleanBit(adresses.lastweapon, offset::unlimited_ammo, 0, true);
+            if (c_ammo == 0 && !defaulta) {
+                read<uint16_t>(adresses.magazines + offsetof(Magazine, Ammo), c_ammo);
 				defaulta = true;
 			}
 			int numMagazines;
@@ -474,7 +474,7 @@ void renderMenu() {
 			}
 		}
 		else if (!USettings.No_Reload && USettings.No_Reload_LastState && success && c_ammo != 0) {
-			setBooleanBit(adresses.lastweapon, 0x162C, 0, false);
+			setBooleanBit(adresses.lastweapon, offset::unlimited_ammo, 0, false);
 			int numMagazines;
 			if (read<int>(adresses.lastweapon + (offset::magazines + sizeof(uintptr_t)), numMagazines)) {
 				for (int i = 0; i < numMagazines; i++) {
@@ -486,19 +486,19 @@ void renderMenu() {
 			}
 		}
 		USettings.No_Reload_LastState = USettings.No_Reload;
-		ImGui::Checkbox("High Fire Rate", &USettings.High_FireRate);
-		if (USettings.High_FireRate && success) {
-			if (fire_rate == 0 && !defaultf) {
-				read<float>(adresses.lastweapon + 0xFD0, fire_rate);
-				defaultf = true;
-			}
-			write<float>(adresses.lastweapon + 0xFD0, 0.001f);
-		}
-		else if (!USettings.High_FireRate && USettings.High_FireRate_LastState && success && fire_rate != 0) {
-			write<float>(adresses.lastweapon + 0xFD0, fire_rate);
-			fire_rate = 0; 
-			defaultf = false;
-		}
+        ImGui::Checkbox("High Fire Rate", &USettings.High_FireRate);
+        if (USettings.High_FireRate && success) {
+            if (saved_fire_rate == 0.0f && !defaultf) {
+                read<float>(adresses.lastweapon + offset::fire_rate, saved_fire_rate);
+                defaultf = true;
+            }
+            write<float>(adresses.lastweapon + offset::fire_rate, 0.001f);
+        }
+        else if (!USettings.High_FireRate && USettings.High_FireRate_LastState && success && saved_fire_rate != 0.0f) {
+            write<float>(adresses.lastweapon + offset::fire_rate, saved_fire_rate);
+            saved_fire_rate = 0.0f; 
+            defaultf = false;
+        }
 		USettings.High_FireRate_LastState = USettings.High_FireRate;
 		ImGui::Checkbox("Show Magazines", &USettings.Show_Magazines);
 		if (USettings.Show_Magazines && RonSettings::MenuWindow == 1 && success) {
@@ -638,15 +638,15 @@ void renderMenu() {
 		ImGui::Checkbox("Fast run", &USettings.fast_run);
 		if (USettings.fast_run && success) {
 			USettings.super_run = false;
-			write<float>(adresses.acknowledgedPawn + 0x280C, 1000);
-			write<float>(adresses.acknowledgedPawn + 0x2810, 1000);
+			write<float>(adresses.acknowledgedPawn + offset::speed, 1000);
+			write<float>(adresses.acknowledgedPawn + offset::acceleration, 1000);
 			defaultv = false;
 		}
 		ImGui::Checkbox("Super run", &USettings.super_run);
 		if (USettings.super_run && success) {
 			USettings.fast_run = false;
-			write<float>(adresses.acknowledgedPawn + 0x280C, 2000);
-			write<float>(adresses.acknowledgedPawn + 0x2810, 2000);
+			write<float>(adresses.acknowledgedPawn + offset::speed, 2000);
+			write<float>(adresses.acknowledgedPawn + offset::acceleration, 2000);
 			defaultv = false;
 		}
 		ImGui::Checkbox("Able to jump", &USettings.jump);
@@ -662,8 +662,8 @@ void renderMenu() {
 			ImGui::SliderFloat("Fov Value", &USettings.fov_value, 40.0f, 170.0f, "%.0f");
 			ImGui::SliderFloat("Base Fov Value", &USettings.base_fov_value, 90.0f, 170.0f, "%.0f");
 			if (success) {
-				write<float>(adresses.cameraComponent + 0x2A0, USettings.fov_value);
-				write<float>(adresses.acknowledgedPawn + 0x22E4, USettings.base_fov_value);
+				write<float>(adresses.cameraComponent + offset::fov, USettings.fov_value);
+				write<float>(adresses.acknowledgedPawn + offset::base_fov, USettings.base_fov_value);
 			}
 		}
 

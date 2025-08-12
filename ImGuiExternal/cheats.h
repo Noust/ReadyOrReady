@@ -4,7 +4,7 @@ bool success = false;
 bool spaceKeyPressed = false;
 bool defaultv = false;
 bool defaultf = false;
-float fire_rate = 0;
+float saved_fire_rate = 0.0f;
 bool defaulta = false;
 uint16_t c_ammo = 0;
 char distStr[32];

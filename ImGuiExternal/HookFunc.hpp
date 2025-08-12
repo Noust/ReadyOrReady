@@ -3,19 +3,38 @@
 
 
 enum offset {
-	UworldOffset = 0x8B37258,
-	game_instance = 0x1B8,
-	localplayer = 0x38,
-	player_controller = 0x30,
-	acknowledged_pawn = 0x340,
-	camera_component = 0x1B18,
-	root_component = 0x1A0,
-	character_health = 0x908,
-	inventory_comp = 0x910,
-	last_weapon = 0x1D8,
-	magazines = 0x1608,
-	camera_manager = 0x350,
-	camera_cache = 0x1330
+    UworldOffset = 0x8BAE758,
+    game_instance = 0x1B8,
+    localplayer = 0x38,
+    player_controller = 0x30,
+    acknowledged_pawn = 0x340,
+    camera_component = 0x1B20,
+    root_component = 0x1A0,
+    character_health = 0x908,
+    inventory_comp = 0x910,
+    last_weapon = 0x1D8,
+    magazines = 0x1608,
+    camera_manager = 0x350,
+    camera_cache = 0x1330,
+
+
+	// specific offsets
+    health = 0xD8,
+    jump = 0x46C,
+    speed = 0x2814,
+    acceleration = 0x2818,
+    god_mode = 0x1768,
+	unlimited_health = 0xF4,
+    melee_reange = 0x1140,
+	unlimited_ammo = 0x162C,
+	fire_rate = 0xFD0,
+    fov = 0x2A0,
+    base_fov = 0x22EC,
+
+
+	//hook/patch offsets
+    fov_hook = 0x2996E10,
+    actors_hook = 0x2EE31BF
 };
 //"ReadyOrNotSteam-Win64-Shipping.exe" + 2996840
 //Address of signature = ReadyOrNotSteam - Win64 - Shipping.exe + 0x02EE2CEF
