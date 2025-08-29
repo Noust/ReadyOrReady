@@ -77,6 +77,7 @@ bool SafeGetActorDetailedHealthData(Actor_Data* actorData, float& outHeadHealth,
 	float& outLeftLegHealth, float& outLeftLegMaxHealth, float& outRightArmHealth, float& outRightArmMaxHealth, float& outRightLegHealth, float& outRightLegMaxHealth);
 bool SafeGetActorPlayerName(Actor_Data* actorData, wchar_t outPlayerName[22]);
 bool SafeGetActorWeaponData(Actor_Data* actorData, uint16_t& outAmmo, uint16_t& outAmmoType, wchar_t outWeaponName[8]);
+void SafeGetActorPointers(Actor_Data* actorData, ValidatedActorData& result);
 ValidatedActorData SafeGetActorCompleteData(Actors* actor);
 bool FastGetActorPosition(Actors* actor, fvector& outPosition);
 

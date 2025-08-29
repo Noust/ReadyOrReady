@@ -10,7 +10,7 @@ struct WindowInfo {
 };
 
 WindowInfo* windowInfo;
-WNDCLASSEX windowClass;
+WNDCLASSEXA windowClass;
 HWND targetWindow;
 
 std::string targetProcessName = "ReadyOrNotSteam-Win64-Shipping.exe";
@@ -87,8 +87,8 @@ void inputHandler() {
 }
 
 bool createOverlay() {	
-	windowClass = { sizeof(WNDCLASSEX), NULL, WndProc, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ovarlayName.c_str(), NULL };
-	RegisterClassEx(&windowClass);
+	windowClass = { sizeof(WNDCLASSEXA), NULL, WndProc, NULL, NULL, NULL, NULL, NULL, NULL, NULL, ovarlayName.c_str(), NULL };
+	RegisterClassExA(&windowClass);
 
 	RECT windowRect;
 	POINT windowPoint;
@@ -102,7 +102,7 @@ bool createOverlay() {
 	windowInfo->Width = windowRect.right;
 	windowInfo->Height = windowRect.bottom;
 
-	overlayWindow = CreateWindowEx(NULL, ovarlayName.c_str(), ovarlayName.c_str(), WS_POPUP | WS_VISIBLE, windowInfo->Left, windowInfo->Top, windowInfo->Width, windowInfo->Height, NULL, NULL, windowClass.hInstance, NULL);
+	overlayWindow = CreateWindowExA(NULL, ovarlayName.c_str(), ovarlayName.c_str(), WS_POPUP | WS_VISIBLE, windowInfo->Left, windowInfo->Top, windowInfo->Width, windowInfo->Height, NULL, NULL, windowClass.hInstance, NULL);
 	DwmExtendFrameIntoClientArea(overlayWindow, &margins);
 	SetWindowLong(overlayWindow, GWL_EXSTYLE, WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW);
 	ShowWindow(overlayWindow, SW_SHOW);
@@ -168,7 +168,7 @@ DWORD WINAPI MainThread(HMODULE hMod) {
 	clearVariable(pDirect);
 	if (overlayWindow) {
 		DestroyWindow(overlayWindow);
-		UnregisterClass(windowClass.lpszClassName, windowClass.hInstance);
+		UnregisterClassA(windowClass.lpszClassName, windowClass.hInstance);
 		overlayWindow = nullptr;
 	}
 
@@ -183,8 +183,8 @@ BOOL APIENTRY DllMain(HMODULE hmodule, DWORD dwreason, LPVOID lpreserved) {
 	switch (dwreason)
 	{
 	case DLL_PROCESS_ATTACH:
-		widthscreen = GetSystemMetrics(SM_CXSCREEN);
-		heightscreen = GetSystemMetrics(SM_CYSCREEN);
+		widthscreen = static_cast<float>(GetSystemMetrics(SM_CXSCREEN));
+		heightscreen = static_cast<float>(GetSystemMetrics(SM_CYSCREEN));
 		c->init();
 		StartThread((LPTHREAD_START_ROUTINE)MainThread, hmodule);
 	default:

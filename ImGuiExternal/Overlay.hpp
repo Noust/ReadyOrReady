@@ -98,9 +98,10 @@ DWORD getProcessID(std::string processName) {
     PROCESSENTRY32 processInfo;
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     processInfo.dwSize = sizeof(PROCESSENTRY32);
+    
     if (Process32First(hSnapshot, &processInfo)) {
         do {
-            if (!lstrcmpi(processInfo.szExeFile, processName.c_str())) {
+            if (!lstrcmpiA(processInfo.szExeFile, processName.c_str())) {
                 CloseHandle(hSnapshot);
                 return processInfo.th32ProcessID;
             }
@@ -197,7 +198,7 @@ void DrawCornerEsp(float W, float H, fvector2d pos, ImColor color, int thickness
 }
 
 void DrawFilledRect(fvector2d pos, float height, float width, ImColor color) {
-    ImGui::GetBackgroundDrawList()->AddRectFilled({ pos.x - width,pos.y - height }, { pos.x + width, pos.y }, color);
+    ImGui::GetBackgroundDrawList()->AddRectFilled({ static_cast<float>(pos.x - width), static_cast<float>(pos.y - height) }, { static_cast<float>(pos.x + width), static_cast<float>(pos.y) }, color);
 }
 
 void drawbox(fvector2d pos, float height, float width, ImColor color, float thickness) {

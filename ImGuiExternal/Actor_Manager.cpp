@@ -169,11 +169,9 @@ bool SafeGetActorHealth(Actor_Data* actorData, float& outHealth) {
 	return SafeGetActorHealthData(actorData, outHealth, maxHealth);
 }
 
-bool SafeGetActorPosition(Actor_Data* actorData, fvector& outPosition) {
-	if (!actorData) return false;
-
+// Helper function for SEH-protected memory access without C++ objects
+static bool SafeReadPositionData(Pos_data* posData, float* x, float* y, float* z) {
 	__try {
-		Pos_data* posData = actorData->PtrToPos;
 		if (!posData) return false;
 
 		MEMORY_BASIC_INFORMATION mbi;
@@ -191,13 +189,33 @@ bool SafeGetActorPosition(Actor_Data* actorData, fvector& outPosition) {
 			return false;
 		}
 
-		outPosition = posData->Pos;
+		*x = posData->Pos.x;
+		*y = posData->Pos.y;
+		*z = posData->Pos.z;
 		return true;
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER) {
-		outPosition = { 0, 0, 0 };
 		return false;
 	}
+}
+
+bool SafeGetActorPosition(Actor_Data* actorData, fvector& outPosition) {
+	if (!actorData) return false;
+
+	// Initialize output to safe values
+	outPosition = { 0, 0, 0 };
+
+	Pos_data* posData = actorData->PtrToPos;
+	float x, y, z;
+	
+	if (SafeReadPositionData(posData, &x, &y, &z)) {
+		outPosition.x = x;
+		outPosition.y = y;
+		outPosition.z = z;
+		return true;
+	}
+	
+	return false;
 }
 
 bool SafeGetActorArrestStatus(Actor_Data* actorData, bool& outArrestComplete) {
@@ -513,10 +531,51 @@ bool SafeGetActorWeaponData(Actor_Data* actorData, uint16_t& outAmmo, uint16_t& 
 	}
 }
 
-ValidatedActorData SafeGetActorCompleteData(Actors* actor) {
-	ValidatedActorData result;
+void SafeGetActorPointers(Actor_Data* actorData, ValidatedActorData& result) {
+	// Initialize to safe values first
+	result.ptrToIncapacitatedBy = nullptr;
+	result.ptrToKilledBy = nullptr;
+	result.ptrToArrestedBy = nullptr;
+	result.ptrToTakenHostageBy = nullptr;
+	result.ptrToSkeleton = nullptr;
+	result.ptrToSkeleton1 = nullptr;
 
-	if (!actor) return result;
+	if (!actorData) return;
+
+	__try {
+		IncapacitatedBy_Data* tempIncapacitatedBy = actorData->PtrToIncapacitatedBy;
+		KilledBy_Data* tempKilledBy = actorData->PtrToKilledBy;
+		ArrestedBy_Data* tempArrestedBy = actorData->PtrToArrestedBy;
+		TakenHostageBy_Data* tempTakenHostageBy = actorData->PtrToTakenHostageBy;
+		Skeleton_Data* tempSkeleton = nullptr;
+		Skeleton_Data1* tempSkeleton1 = nullptr;
+		
+		// Get mesh skeleton pointers
+		if (actorData->PtrToMesh) {
+			tempSkeleton = actorData->PtrToMesh->PtrToSkeleton;
+			tempSkeleton1 = actorData->PtrToMesh->PtrToSkeleton1;
+		}
+
+		// Only assign after successful reads
+		result.ptrToIncapacitatedBy = tempIncapacitatedBy;
+		result.ptrToKilledBy = tempKilledBy;
+		result.ptrToArrestedBy = tempArrestedBy;
+		result.ptrToTakenHostageBy = tempTakenHostageBy;
+		result.ptrToSkeleton = tempSkeleton;
+		result.ptrToSkeleton1 = tempSkeleton1;
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER) {
+		// If pointer retrieval fails, pointers remain nullptr (already set above)
+	}
+}
+
+ValidatedActorData SafeGetActorCompleteData(Actors* actor) {
+	if (!actor) {
+		ValidatedActorData emptyResult;
+		return emptyResult;
+	}
+
+	ValidatedActorData result;
 
 	// Buscar en cach� primero
 	DWORD currentTime = GetTickCount();
@@ -601,28 +660,8 @@ ValidatedActorData SafeGetActorCompleteData(Actors* actor) {
 
 	result.ptrToActor = actorData;
 
-	// Get pointer addresses for external references
-	__try {
-		result.ptrToIncapacitatedBy = actorData->PtrToIncapacitatedBy;
-		result.ptrToKilledBy = actorData->PtrToKilledBy;
-		result.ptrToArrestedBy = actorData->PtrToArrestedBy;
-		result.ptrToTakenHostageBy = actorData->PtrToTakenHostageBy;
-		
-		// Get mesh skeleton pointers
-		if (actorData->PtrToMesh) {
-			result.ptrToSkeleton = actorData->PtrToMesh->PtrToSkeleton;
-			result.ptrToSkeleton1 = actorData->PtrToMesh->PtrToSkeleton1;
-		}
-	}
-	__except (EXCEPTION_EXECUTE_HANDLER) {
-		// If pointer retrieval fails, set to nullptr but don't fail the entire function
-		result.ptrToIncapacitatedBy = nullptr;
-		result.ptrToKilledBy = nullptr;
-		result.ptrToArrestedBy = nullptr;
-		result.ptrToTakenHostageBy = nullptr;
-		result.ptrToSkeleton = nullptr;
-		result.ptrToSkeleton1 = nullptr;
-	}
+	// Get pointer addresses for external references (moved to separate function)
+	SafeGetActorPointers(actorData, result);
 
 	result.isSquad = result.maxHealth == 160 || result.maxHealth == 250;
 	result.isCivilian = result.maxHealth == 200 || result.maxHealth == 100;

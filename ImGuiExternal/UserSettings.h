@@ -53,7 +53,7 @@ namespace RonSettings {
 		ImColor Civilian_Status_Esp_Color = { 0,255,0 };
 		bool Status_Esp = false;
 
-		fvector2d SnaplLine_Esp_Start_Point = { widthscreen / 2,heightscreen };
+		fvector2d SnaplLine_Esp_Start_Point = { widthscreen / 2.0f, heightscreen };
 		bool SnaplLine_Esp_End_Point = false;
 		ImColor Enemy_SnaplLine_Esp_Color = { 255,0,0 };
 		ImColor Civilian_SnaplLine_Esp_Color = { 0,255,0 };
@@ -288,7 +288,7 @@ void default_all() {
 	USettings.Civilian_Status_Esp_Color = { 0,255,0 };
 	USettings.Status_Esp = false;
 
-	USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2,heightscreen };
+	USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2.0f, heightscreen };
 	USettings.SnaplLine_Esp_End_Point = false;
 	USettings.Enemy_SnaplLine_Esp_Color = { 255,0,0 };
 	USettings.Civilian_SnaplLine_Esp_Color = { 0,255,0 };

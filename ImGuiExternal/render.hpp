@@ -276,7 +276,7 @@ void renderEsp() {
 				if (USettings.DrawCrosshair) {
 					bool shouldDraw = !USettings.whennotaiming && !GetAsyncKeyState(VK_RBUTTON);
 					if (shouldDraw) {
-						fvector2d screenCenter{ widthscreen / 2, heightscreen / 2 };
+						fvector2d screenCenter{ widthscreen / 2.0f, heightscreen / 2.0f };
 						float size = USettings.Crosshair_size;
 						float thickness = USettings.Crosshair_thickness;
 						ImColor color = USettings.Crosshair_Color;
@@ -307,9 +307,9 @@ void renderEsp() {
 			if (read<float>(adresses.characterHealth + offset::health, LHealth)) {
 				if (LHealth > 1) {
 					if (USettings.ShowFov || USettings.FilledCircle) {
-						ImVec2 screenCenter{ widthscreen / 2, heightscreen / 2 };
+						ImVec2 screenCenter{ widthscreen / 2.0f, heightscreen / 2.0f };
 						if (USettings.ShowFov) {
-							DrawCircle({ widthscreen / 2, heightscreen / 2 }, USettings.AimFov, USettings.FovThickness, USettings.FovColor);
+							DrawCircle({ widthscreen / 2.0f, heightscreen / 2.0f }, USettings.AimFov, USettings.FovThickness, USettings.FovColor);
 						}
 						if (USettings.FilledCircle) {
 							ImGui::GetBackgroundDrawList()->AddCircleFilled(screenCenter, USettings.AimFov, USettings.FilledCircleColor);
@@ -326,7 +326,7 @@ void renderEsp() {
 								fvector aimPos = actorData.position;
 
 								fvector2d screenPos = w2s(aimPos);
-								DrawLine({ widthscreen / 2, heightscreen / 2 }, screenPos, USettings.TargetColor, USettings.TargetThickness, true);
+								DrawLine({ widthscreen / 2.0f, heightscreen / 2.0f }, screenPos, USettings.TargetColor, USettings.TargetThickness, true);
 							}
 						}
 					}
@@ -711,11 +711,11 @@ void renderMenu() {
 				ImGui::Text("Line Start Position");
 				if (ImGui::BeginTable("LinePositions", 2)) {
 					ImGui::TableNextColumn();
-					if (ImGui::Button("Bottom")) USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2, heightscreen };
-					if (ImGui::Button("Left")) USettings.SnaplLine_Esp_Start_Point = { 0, heightscreen / 2 };
+					if (ImGui::Button("Bottom")) USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2.0f, heightscreen };
+					if (ImGui::Button("Left")) USettings.SnaplLine_Esp_Start_Point = { 0.0f, heightscreen / 2.0f };
 					ImGui::TableNextColumn();
-					if (ImGui::Button("Top")) USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2, 0 };
-					if (ImGui::Button("Right")) USettings.SnaplLine_Esp_Start_Point = { widthscreen, heightscreen / 2 };
+					if (ImGui::Button("Top")) USettings.SnaplLine_Esp_Start_Point = { widthscreen / 2.0f, 0.0f };
+					if (ImGui::Button("Right")) USettings.SnaplLine_Esp_Start_Point = { widthscreen, heightscreen / 2.0f };
 					ImGui::EndTable();
 				}
 

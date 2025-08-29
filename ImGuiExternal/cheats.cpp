@@ -17,8 +17,8 @@ void AimBot(fvector AimPos) {
 	fvector2d screenPos = w2s(AimPos);
 
 	if (screenPos.x != -1 && screenPos.y != -1) {
-		int centerX = widthscreen / 2;
-		int centerY = heightscreen / 2;
+		int centerX = static_cast<int>(widthscreen / 2.0f);
+		int centerY = static_cast<int>(heightscreen / 2.0f);
 
 		double deltaX = screenPos.x - centerX;
 		double deltaY = screenPos.y - centerY;
@@ -79,7 +79,7 @@ void aimbot(int index) {
 
 		fvector aimPos = actorData.position;
 
-		if (w2s(aimPos).distance({ widthscreen / 2, heightscreen / 2 }) < USettings.AimFov) {
+		if (w2s(aimPos).distance({ widthscreen / 2.0f, heightscreen / 2.0f }) < USettings.AimFov) {
 			AimBot(aimPos);
 		}
 	}

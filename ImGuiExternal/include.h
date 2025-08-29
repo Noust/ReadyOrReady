@@ -24,8 +24,8 @@
 
 DWORD64 Uworld;
 
-double widthscreen;
-double heightscreen;
+float widthscreen;
+float heightscreen;
 
 #include "image.h"
 #include "vector.h"

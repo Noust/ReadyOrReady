@@ -29,7 +29,7 @@ void SimulateMouseMove(int dx, int dy) {
 }
 
 void MoveToTarget(int targetX, int targetY) {
-    fvector2d center{ widthscreen / 2, heightscreen / 2 };
+    fvector2d center{ widthscreen / 2.0f, heightscreen / 2.0f };
 
     fvector2d targetscreen = {
         targetX - center.x,
