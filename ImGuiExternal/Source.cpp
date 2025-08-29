@@ -1,5 +1,12 @@
 #include "include.h"
 
+//Coded by Noust
+
+// Global variable definitions
+DWORD64 Uworld;
+float widthscreen;
+float heightscreen;
+
 struct WindowInfo {
 	int Width;
 	int Height;
@@ -159,7 +166,11 @@ DWORD WINAPI MainThread(HMODULE hMod) {
 	}
 	disable_all();
 	Sleep(100);
-	c->unload();
+	if (c) {
+		c->unload();
+		delete c;
+		c = nullptr;
+	}
 	ImGui_ImplDX9_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
@@ -185,6 +196,7 @@ BOOL APIENTRY DllMain(HMODULE hmodule, DWORD dwreason, LPVOID lpreserved) {
 	case DLL_PROCESS_ATTACH:
 		widthscreen = static_cast<float>(GetSystemMetrics(SM_CXSCREEN));
 		heightscreen = static_cast<float>(GetSystemMetrics(SM_CYSCREEN));
+		c = new cheats();
 		c->init();
 		StartThread((LPTHREAD_START_ROUTINE)MainThread, hmodule);
 	default:

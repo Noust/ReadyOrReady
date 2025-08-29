@@ -1,21 +1,23 @@
 #pragma once
 #include "include.h"
-bool success = false;
-bool spaceKeyPressed = false;
-bool defaultf = false;
-float saved_fire_rate = 0.0f;
-bool defaulta = false;
-uint16_t c_ammo = 0;
-char distStr[32];
-char HealthStr[32];
-float LHealth;
+
+extern bool success;
+extern bool spaceKeyPressed;
+extern bool defaultf;
+extern float saved_fire_rate;
+extern bool defaulta;
+extern uint16_t c_ammo;
+extern char distStr[32];
+extern char HealthStr[32];
+extern float LHealth;
 
 class cheats {
 public:
 	void init();
 	void unload();
 };
-cheats* c;
+
+extern cheats* c;
 
 void AimBot(fvector AimPos);
 

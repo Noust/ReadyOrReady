@@ -1,7 +1,13 @@
 #pragma once
-#include "include.h"
-DWORD64 Actors_Hook;
-DWORD64 jmpback;
+#include <Windows.h>
+#include <cstdint>
+#include <cstring>
+#include "vector.h"
+
+extern DWORD64 Actors_Hook;
+extern DWORD64 jmpback;
+extern BYTE* hook_target;
+extern PVOID veh_handle;
 
 class Actors
 {
@@ -165,8 +171,8 @@ public:
     char pad_0000[136]; //0x0000
 }; //Size: 0x0088
 
-Actors* Actor[255];
-Actors* ActorsAddr;
+extern Actors* Actor[255];
+extern Actors* ActorsAddr;
 
 
 //__declspec(naked) void GetActors() {
@@ -178,31 +184,9 @@ Actors* ActorsAddr;
 //	}
 //}
 
-void VEH_GetActors_Wrapper(PCONTEXT ctx) {
-    DWORD64 rdx_val = ctx->Rdx;
-    DWORD64 rbx_val = ctx->Rbx;
-    
-    BYTE data[16];
-    memcpy(data, (void*)(rdx_val + 0x128), 16);
-    
-    memcpy((void*)(rbx_val + 0x80), data, 16);
-    
-    ActorsAddr = (Actors*)rdx_val;
-    
-    ctx->Rip = jmpback;
-}
-
-LONG WINAPI GetActors_VEHHandler(PEXCEPTION_POINTERS ExceptionInfo) {
-    if (ExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_BREAKPOINT ||
-        ExceptionInfo->ExceptionRecord->ExceptionCode == EXCEPTION_SINGLE_STEP) {
-        
-        if (ExceptionInfo->ExceptionRecord->ExceptionAddress == (PVOID)hook_target) {
-            VEH_GetActors_Wrapper(ExceptionInfo->ContextRecord);
-            return EXCEPTION_CONTINUE_EXECUTION;
-        }
-    }
-    return EXCEPTION_CONTINUE_SEARCH;
-}
+// Function declarations - implementations are in hooks.cpp
+void VEH_GetActors_Wrapper(PCONTEXT ctx);
+LONG WINAPI GetActors_VEHHandler(PEXCEPTION_POINTERS ExceptionInfo);
 
 struct Magazine {
 	uint16_t Ammo;

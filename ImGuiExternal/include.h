@@ -22,10 +22,9 @@
 #pragma comment(lib, "d3d9.lib")
 #pragma comment(lib, "dwmapi.lib")
 
-DWORD64 Uworld;
-
-float widthscreen;
-float heightscreen;
+extern DWORD64 Uworld;
+extern float widthscreen;
+extern float heightscreen;
 
 #include "image.h"
 #include "vector.h"

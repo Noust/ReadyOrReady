@@ -1,5 +1,17 @@
 #include "include.h"
 
+// Global variable definitions
+bool success = false;
+bool spaceKeyPressed = false;
+bool defaultf = false;
+float saved_fire_rate = 0.0f;
+bool defaulta = false;
+uint16_t c_ammo = 0;
+char distStr[32];
+char HealthStr[32];
+float LHealth;
+cheats* c = nullptr;
+
 void cheats::init() {
 	Actors_Hook = GetAddr(offset::actors_hook);
 	jmpback = Actors_Hook + 14;

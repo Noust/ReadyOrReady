@@ -1,6 +1,9 @@
 #pragma once
 #include "include.h"
 
+extern PVOID veh_handle;
+extern BYTE* hook_target;
+
 
 enum offset {
     UworldOffset = 0x8BAE758,
@@ -122,8 +125,6 @@ DWORD64 FindPattern(char* module, char* pattern, char* mask)
 	return NULL;
 }
 
-static PVOID veh_handle = nullptr;
-static BYTE* hook_target = nullptr;
 
 LONG WINAPI GetActors_VEHHandler(PEXCEPTION_POINTERS ExceptionInfo);
 
