@@ -640,15 +640,22 @@ void renderMenu() {
 			USettings.super_run = false;
 			write<float>(adresses.acknowledgedPawn + offset::speed, 1000);
 			write<float>(adresses.acknowledgedPawn + offset::acceleration, 1000);
-			defaultv = false;
+		}else if (!USettings.fast_run && USettings.fast_run_LastState && success) {
+			write<float>(adresses.acknowledgedPawn + offset::speed, 320);
+			write<float>(adresses.acknowledgedPawn + offset::acceleration, 500);
 		}
+		USettings.fast_run_LastState = USettings.fast_run;
 		ImGui::Checkbox("Super run", &USettings.super_run);
 		if (USettings.super_run && success) {
 			USettings.fast_run = false;
 			write<float>(adresses.acknowledgedPawn + offset::speed, 2000);
 			write<float>(adresses.acknowledgedPawn + offset::acceleration, 2000);
-			defaultv = false;
 		}
+		else if (!USettings.super_run && USettings.super_run_LastState && success) {
+			write<float>(adresses.acknowledgedPawn + offset::speed, 320);
+			write<float>(adresses.acknowledgedPawn + offset::acceleration, 500);
+		}
+		USettings.super_run_LastState = USettings.super_run;
 		ImGui::Checkbox("Able to jump", &USettings.jump);
 		ImGui::PopStyleColor();
 	}

@@ -33,7 +33,7 @@ void AimBot(fvector AimPos) {
 }
 
 void loop() {
-	if (USettings.esp || USettings.fov_changer || USettings.fast_run || USettings.super_run || USettings.jump || USettings.GodMode || USettings.Unlimited_MeleeRange || USettings.GodMode_LastState || USettings.High_FireRate_LastState || USettings.No_Reload_LastState || USettings.Unlimited_MeleeRange_LastState || USettings.Show_Magazines || USettings.Show_actors || USettings.Aimbot || !defaultv) {
+	if (USettings.esp || USettings.fov_changer || USettings.fast_run || USettings.super_run || USettings.jump || USettings.GodMode || USettings.Unlimited_MeleeRange || USettings.GodMode_LastState || USettings.High_FireRate_LastState || USettings.No_Reload_LastState || USettings.Unlimited_MeleeRange_LastState || USettings.fast_run_LastState || USettings.super_run_LastState || USettings.Show_Magazines || USettings.Show_actors || USettings.Aimbot) {
 		if (ReadValues())
 			success = true;
 		else
@@ -52,14 +52,6 @@ void loop() {
 		}
 		else if (!isSpaceCurrentlyPressed && spaceKeyPressed) {
 			spaceKeyPressed = false;
-		}
-	}
-
-	if (!USettings.fast_run && !USettings.super_run) {
-		if (success && !defaultv) {
-			write<float>(adresses.acknowledgedPawn + offset::speed, 320);
-			write<float>(adresses.acknowledgedPawn + offset::acceleration, 500);
-			defaultv = true;
 		}
 	}
 

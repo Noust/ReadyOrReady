@@ -134,7 +134,9 @@ namespace RonSettings {
 
 		//movement
 		bool fast_run = false;
+		bool fast_run_LastState = false;
 		bool super_run = false;
+		bool super_run_LastState = false;
 		bool jump = false;
 
 		bool window_animation = true;

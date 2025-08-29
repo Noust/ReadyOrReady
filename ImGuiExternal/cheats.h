@@ -2,7 +2,6 @@
 #include "include.h"
 bool success = false;
 bool spaceKeyPressed = false;
-bool defaultv = false;
 bool defaultf = false;
 float saved_fire_rate = 0.0f;
 bool defaulta = false;
