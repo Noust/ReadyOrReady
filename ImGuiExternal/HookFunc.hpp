@@ -6,12 +6,12 @@ extern BYTE* hook_target;
 
 
 enum offset {
-    UworldOffset = 0x8BAE758,
+    UworldOffset = 0x8BB7F58,
     game_instance = 0x1B8,
     localplayer = 0x38,
     player_controller = 0x30,
     acknowledged_pawn = 0x340,
-    camera_component = 0x1B20,
+    camera_component = 0x1B28,
     root_component = 0x1A0,
     character_health = 0x908,
     inventory_comp = 0x910,
@@ -24,20 +24,20 @@ enum offset {
 	// specific offsets
     health = 0xD8,
     jump = 0x46C,
-    speed = 0x2814,
-    acceleration = 0x2818,
-    god_mode = 0x1768,
+    speed = 0x2824,
+    acceleration = 0x2828,
+    god_mode = 0x1770,
 	unlimited_health = 0xF4,
-    melee_reange = 0x1140,
+    melee_reange = 0x1148,
 	unlimited_ammo = 0x162C,
 	fire_rate = 0xFD0,
     fov = 0x2A0,
-    base_fov = 0x22EC,
+    base_fov = 0x22FC,
 
 
 	//hook/patch offsets
-    fov_hook = 0x2996E10,
-    actors_hook = 0x2EE31BF
+    fov_hook = 0x2997B30,
+    actors_hook = 0x2EE3DFF
 };
 //"ReadyOrNotSteam-Win64-Shipping.exe" + 2996840
 //Address of signature = ReadyOrNotSteam - Win64 - Shipping.exe + 0x02EE2CEF
